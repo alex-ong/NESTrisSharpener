@@ -8,19 +8,20 @@ bool inBox(float2 uv) {
 	return (uv.x > startX && uv.x < endX && uv.y > startY && uv.y < endY);
 }
 
-float4 blockTex(float2 uv, float4 base) {	
-	//if (!white) {
-	//	uv = float2(uv.x / 2.0, uv.y);
-	//	return image.Sample(other_image, uv);
-	//} else {
+float4 blockTex(bool white, float2 uv, float4 base) {	
+	if (!white) {	
 		uv = float2(uv.x / 2.0, uv.y);
-		float4 result = other_image.Sample(textureSampler, uv);
-		if (result.a == 0.0) {
-			return base;
-		} else {
-			return result;
-		}
-	//}
+	} else {
+		uv = float2(uv.x / 2.0 + 0.5, uv.y);
+	}
+
+	float4 result = other_image.Sample(textureSampler, uv);
+	if (result.a == 0.0) {
+		return base;
+	} else {
+		return result;
+	}		
+	
 }
 
 bool isWhite(float4 rgba) {
@@ -52,11 +53,15 @@ float4 mainImage(VertData v_in) : TARGET
 		if (isBlack(centre)) {
 			return float4(0.0,0.0,0.0,1.0);
 		} else if (isWhite(centre)) {
-			float4 base = float4(1.0,1.0,1.0,1.0);
-			return base;
+			float topyUv = centreyUv + 2.5/224.0;
+			float bottomyUv = centreyUv - 3.5/224.0;
+			float4 top = image.Sample(textureSampler, float2(centrexUv, topyUv));
+			float4 bottom = image.Sample(textureSampler, float2(centrexUv, bottomyUv));			
+			float4 avg = top + bottom / 2.0;
+			return blockTex(true, float2(blockxUv, blockyUv), avg);
 		} else {				
 			//return centre;
-			return blockTex(float2(blockxUv,blockyUv),centre);
+			return blockTex(false, float2(blockxUv,blockyUv),centre);
 		}
 		
 	} else { //not in play area.	
