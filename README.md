@@ -4,8 +4,8 @@ A simple OBS shader for upscaling graphics.
 #TODO full guide
 
 1) Download and install this plugin:
-Download: https://github.com/nleseul/obs-shaderfilter/releases
-Install: read this - https://github.com/nleseul/obs-shaderfilter/
+* Download: https://github.com/nleseul/obs-shaderfilter/releases
+* Install: read this - https://github.com/nleseul/obs-shaderfilter/
 
 2) Add your video source (i.e. NES Tetris composite AV signal)
 3) Add filter... (right click on video source, hit "filter")
