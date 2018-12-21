@@ -25,7 +25,7 @@ float4 blockTex(bool white, float2 uv, float4 base) {
 }
 
 bool isWhite(float4 rgba) {
-	float limit = 0.8;
+	float limit = 0.5;
 	return (rgba.r >= limit && 
 			rgba.g >= limit &&
 			rgba.b >= limit);
@@ -48,20 +48,24 @@ float4 mainImage(VertData v_in) : TARGET
 		float blockxUv = ((uv.x * 256.0) % 8.0) / 8.0;
 		float blockyUv = ((uv.y * 224.0) % 8.0) / 8.0;
 		float4 centre = image.Sample(textureSampler, float2(centrexUv, centreyUv));
+		//float4 tl = image.Sample(textureSampler,float2(centrexUv - 1/256.0, centreyUv - 1/224.0));
+		float4 tr = image.Sample(textureSampler,float2(centrexUv + 1/256.0, centreyUv - 1/224.0));
+		float4 bl = image.Sample(textureSampler,float2(centrexUv - 1/256.0, centreyUv + 1/224.0));
+		float4 br = image.Sample(textureSampler,float2(centrexUv + 1/256.0, centreyUv + 1/224.0));
+		float4 avg = (tr + bl + br + centre) / 4.0;
 
 		//now we have two scenarios - centre is white, or not
-		if (isBlack(centre)) {
+		if (isBlack(avg)) {
 			return float4(0.0,0.0,0.0,1.0);
-		} else if (isWhite(centre)) {
+		} else if (isWhite(avg)) {
 			float topyUv = centreyUv + 2.5/224.0;
 			float bottomyUv = centreyUv - 3.5/224.0;
 			float4 top = image.Sample(textureSampler, float2(centrexUv, topyUv));
 			float4 bottom = image.Sample(textureSampler, float2(centrexUv, bottomyUv));			
-			float4 avg = top + bottom / 2.0;
+			float4 avg = (top + bottom) / 2.0;
 			return blockTex(true, float2(blockxUv, blockyUv), avg);
-		} else {				
-			//return centre;
-			return blockTex(false, float2(blockxUv,blockyUv),centre);
+		} else {							
+			return blockTex(false, float2(blockxUv,blockyUv), avg);
 		}
 		
 	} else { //not in play area.	
