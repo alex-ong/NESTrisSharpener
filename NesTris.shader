@@ -1,7 +1,8 @@
 uniform texture2d other_image;
 uniform bool skip_detect_game;
 uniform bool skip_detect_game_over;
-
+uniform bool stat_palette_white;
+uniform bool stat_palette;
 bool inBox(float2 uv) {	
 	float startX = 12/32.0;
 	float endX = startX + 10/32.0;
@@ -54,6 +55,17 @@ bool isGrey(float4 rgba) {
 	
 }
 
+float4 palette1() {
+	return (sampleBlock(float2(0.137,0.459)));
+	//return (sampleBlock(float2(0.137,0.459)) + //J piece in statistics.
+	//		sampleBlock(float2(0.138,0.677))) / 2.0;  //S Piece
+}
+float4 palette2() {
+	return (sampleBlock(float2(0.138,0.526)));
+	//return (sampleBlock(float2(0.138,0.529)) + //z piece in statistics.
+	//      sampleBlock(float2(0.138,0.743))) / 2.0; // L piece
+}
+
 //Simple 4 sample of centre of 8x8 block
 float4 sampleBlock(float2 uv)
 {	
@@ -104,7 +116,13 @@ bool isGameOver()
 	}
 	
 }
-
+float colorDist(float4 a, float4 b)
+{
+	float rDist = ((a.r-b.r)*0.30) * ((a.r-b.r)*0.30);
+	float gDist = ((a.g-b.g)*0.59) * ((a.g-b.g)*0.59);
+	float bDist = ((a.b-b.b)*0.11) * ((a.b-b.b)*0.11);
+	return rDist+gDist+bDist;
+}
 float4 mainImage(VertData v_in) : TARGET
 {	
 	float2 uv = v_in.uv;
@@ -138,9 +156,24 @@ float4 mainImage(VertData v_in) : TARGET
 		if (isBlack(avg)) {
 			return float4(0.0,0.0,0.0,1.0);
 		} else if (isWhite(avg)) {
-			avg = sampleEdge(float2(centrexUv,centreyUv));
+			if (stat_palette_white) {
+				avg = palette1();				
+			} else {
+				avg = sampleEdge(float2(centrexUv,centreyUv));
+			}
 			return blockTex(true, blockUv, avg);
 		} else {							
+			if (stat_palette) {
+				float4 p1 = palette1();
+				float4 p2 = palette2();
+				float dist1 = colorDist(p1,avg);
+				float dist2 = colorDist(p2,avg);
+				if (dist1 < dist2) {
+					avg = p1;
+				} else {
+					avg = p2;
+				}
+			}
 			return blockTex(false, blockUv, avg);
 		}
 		
