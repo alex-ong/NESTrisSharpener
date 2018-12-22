@@ -100,13 +100,13 @@ bool isWhite(float4 rgba) {
 			rgba.b >= limit);
 }
 bool isBlack(float4 rgba) {
-	float limit = 0.2;
+	float limit = 0.15;
 	return (rgba.r <= limit &&
 			rgba.g <= limit &&
 			rgba.b <= limit);
 }
 bool isGrey(float4 rgba) {
-	float limit = 0.15;
+	float limit = 0.25;
 	return (rgba.r >= 0.5 - limit && rgba.r <= 0.5 + limit &&
 			rgba.g >= 0.5 - limit && rgba.g <= 0.5 + limit &&
 			rgba.b >= 0.5 - limit && rgba.b <= 0.5 + limit);
@@ -151,7 +151,7 @@ bool isInGame()
 	float4 black1 = sampleBlock(gameBlack1_uv()); //black box next to "LINES";
 	float4 black2 = sampleBlock(gameBlack2_uv()); //black box of "TOP/SCORE"
 	float4 grey1 = sampleBlock(gameGrey1_uv()); //grey box of bottom middle left
-	return (isBlack(black1) && isBlack(black2) && isGrey(grey1));
+	return (isBlack(black1) && isBlack(black2) && (isGrey(grey1) || isWhite(grey1)));
 }
 
 //if top edge is not black, we assume game over.
@@ -172,6 +172,7 @@ bool isGameOver()
 	}
 	
 }
+
 float colorDist(float4 a, float4 b)
 {
 	float rDist = ((a.r-b.r)) * ((a.r-b.r));
