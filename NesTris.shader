@@ -1,9 +1,12 @@
 uniform texture2d block_image;
 uniform bool setup_mode;
-uniform float field_box_left_x;
-uniform float field_box_right_x;
-uniform float field_box_top_y;
-uniform float field_box_bottom_y;
+uniform float field_left_x;
+uniform float field_right_x;
+uniform float field_top_y;
+uniform float field_bottom_y;
+
+uniform bool stat_palette_white;
+uniform bool stat_palette;
 
 uniform float paletteA_x1;
 uniform float paletteA_y1;
@@ -17,15 +20,19 @@ uniform float paletteB_y2;
 
 uniform bool skip_detect_game;
 uniform bool skip_detect_game_over;
-uniform bool stat_palette_white;
-uniform bool stat_palette;
 
+uniform float game_black_x1;
+uniform float game_black_y1;
+uniform float game_black_x2;
+uniform float game_black_y2;
+uniform float game_grey_x1;
+uniform float game_grey_y1;
 
 bool inBox(float2 uv) {	
-	float startX = field_box_left_x / 256.0;
-	float endX = field_box_right_x / 256.0;
-	float startY = field_box_top_y / 224.0;
-	float endY = field_box_bottom_y / 224.0;
+	float startX = field_left_x / 256.0;
+	float endX = field_right_x / 256.0;
+	float startY = field_top_y / 224.0;
+	float endY = field_bottom_y / 224.0;
 	return (uv.x > startX && uv.x < endX && uv.y > startY && uv.y < endY);
 }
 
@@ -53,16 +60,21 @@ float4 paletteA2_box(){	return pixBox(paletteA2_uv(), 1);}
 float4 paletteB1_box(){	return pixBox(paletteB1_uv(), 1);}
 float4 paletteB2_box(){	return pixBox(paletteB2_uv(), 1);}
 
+float2 gameBlack1_uv() { return float2(game_black_x1 / 256.0, game_black_y1 / 224.0); }
+float2 gameBlack2_uv() { return float2(game_black_x2 / 256.0, game_black_y2 / 224.0); }
+float2 gameGrey1_uv() { return float2(game_grey_x1 / 256.0, game_grey_y1 / 224.0); }
 
-
+float4 gameBlack1_box(){ return pixBox(gameBlack1_uv(), 2);}
+float4 gameBlack2_box(){ return pixBox(gameBlack2_uv(), 2);}
+float4 gameGrey1_box() { return pixBox(gameGrey1_uv(), 2);}
 
 //width as portion of full screen width.
 float blockWidth() {
-	return (field_box_right_x - field_box_left_x) / 10.0 / 256.0;
+	return (field_right_x - field_left_x) / 10.0 / 256.0;
 }
 
 float blockHeight() {
-	return (field_box_bottom_y - field_box_top_y) / 20.0 / 224.0;
+	return (field_bottom_y - field_top_y) / 20.0 / 224.0;
 }
 
 float4 blockTex(bool white, float2 uv, float4 base) {	
@@ -136,9 +148,9 @@ float4 sampleEdge(float2 uv)
 
 bool isInGame()
 {
-	float4 black1 = sampleBlock(float2(0.384,0.086)); //black box next to "LINES";
-	float4 black2 = sampleBlock(float2(0.928,0.074)); //black box of "TOP/SCORE"
-	float4 grey1 = sampleBlock(float2(0.049,0.977)); //grey box of bottom middle left
+	float4 black1 = sampleBlock(gameBlack1_uv()); //black box next to "LINES";
+	float4 black2 = sampleBlock(gameBlack2_uv()); //black box of "TOP/SCORE"
+	float4 grey1 = sampleBlock(gameGrey1_uv()); //grey box of bottom middle left
 	return (isBlack(black1) && isBlack(black2) && isGrey(grey1));
 }
 
@@ -195,6 +207,17 @@ float4 setupDraw(float2 uv)
 		}
 	}
 	
+	if (!skip_detect_game) 
+	{
+		if (inBox2(uv, gameBlack1_box())) {
+			return float4(0.0,0.0,1.0,1.0);
+		} else if (inBox2(uv, gameBlack2_box())) {
+			return float4(0.0,0.0,1.0,1.0);
+		} else if (inBox2(uv, gameGrey1_box())) {
+			return float4(0.0,0.0,1.0,1.0);
+		}
+	}
+	
 	return image.Sample(textureSampler, uv);
 	
 }
@@ -223,8 +246,8 @@ float4 mainImage(VertData v_in) : TARGET
 	if (inBox(uv)) { //in play area		
 		float bw = blockWidth();
 		float bh = blockHeight();
-		float fblx = field_box_left_x/256.0;
-		float fbty = field_box_top_y /224.0;
+		float fblx = field_left_x/256.0;
+		float fbty = field_top_y /224.0;
 		
 		float centrexUv = floor((uv.x - fblx) / bw) * bw + fblx + bw/2.0;		
 		float centreyUv = floor((uv.y - fbty) / bh) * bh + fbty + bh/2.0;
