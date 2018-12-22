@@ -14,3 +14,6 @@ A simple OBS shader for upscaling graphics.
 6) other_image  -> Browse -> blocks.png
 
 Should all be working now. If it isn't aligned properly, try to add a crop/pad filter before this in the chain, so that it lines up.
+
+#TODO: explanation of parameters
+
