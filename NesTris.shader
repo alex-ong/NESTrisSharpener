@@ -189,43 +189,17 @@ bool isGameOver()
 
 
 
-/*colorDistLAB*/
-
-float3 rgb2lab(float4 rgb){
-  float x, y, z;
-  float r = rgb.r;
-  float g = rgb.g;
-  float b = rgb.b;
-  r = (r > 0.04045) ? pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
-  g = (g > 0.04045) ? pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
-  b = (b > 0.04045) ? pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
-  x = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
-  y = (r * 0.2126 + g * 0.7152 + b * 0.0722) / 1.00000;
-  z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
-  x = (x > 0.008856) ? pow(x, 1/3) : (7.787 * x) + 16/116;
-  y = (y > 0.008856) ? pow(y, 1/3) : (7.787 * y) + 16/116;
-  z = (z > 0.008856) ? pow(z, 1/3) : (7.787 * z) + 16/116;
-  return float3((116 * y) - 16, 500 * (x - y), 200 * (y - z));
-}
-
-float deltaE(float4 rgbA, float4 rgbB) {
-  float3 labA = rgb2lab(rgbA);
-  float3 labB = rgb2lab(rgbB);
-  float deltaL = labA.r - labB.r;
-  float deltaA = labA.g - labB.g;
-  float deltaB = labA.b - labB.b;
-  
-  return sqrt(deltaL*deltaL +deltaA*deltaA + deltaB*deltaB);
-}
-/*end colorDistLAB*/
-
-
+//There have been many attempts to weight RGB values to better fit human perception, 
+//where the components are commonly weighted (red 30%, green 59%, and blue 11%), 
+//however these are demonstratively worse at color determinations and are properly 
+//the contributions to the brightness of these colors, rather than to the degree to which human 
+//vision has less tolerance for these colors. 
+//The closer approximations would be more properly coefficients of 2, 4, and 3
 float colorDist(float4 a, float4 b)
 {
-	//return deltaE(a,b);
-	float rDist = ((a.r-b.r)) * ((a.r-b.r));
-	float gDist = ((a.g-b.g)) * ((a.g-b.g));
-	float bDist = ((a.b-b.b)) * ((a.b-b.b));
+	float rDist = 2* ((a.r-b.r)) * ((a.r-b.r));
+	float gDist = 4*((a.g-b.g)) * ((a.g-b.g));
+	float bDist = 3*((a.b-b.b)) * ((a.b-b.b));
 	return rDist+gDist+bDist;
 	
 }
