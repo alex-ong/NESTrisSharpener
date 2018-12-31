@@ -1,4 +1,5 @@
 uniform texture2d block_image;
+
 uniform bool setup_mode;
 uniform float field_left_x;
 uniform float field_right_x;
@@ -7,6 +8,8 @@ uniform float field_bottom_y;
 
 uniform bool stat_palette_white;
 uniform bool stat_palette;
+uniform bool fixed_palette;
+uniform texture2d fixed_palette_image;
 
 uniform float paletteA_x1;
 uniform float paletteA_y1;
@@ -122,6 +125,17 @@ float4 palette2() {
 	        sampleBlock(paletteB2_uv())) / 2.0; // L piece
 }
 
+float4 matchPalette(float4 p1, float4 p2, float4 col)
+{	
+	float dist1 = colorDist(p1,col);
+	float dist2 = colorDist(p2,col);
+	if (dist1 < dist2) {
+		return p1;
+	} else {
+		return p2;
+	}
+}
+
 //Simple 4 sample of centre of 8x8 block
 float4 sampleBlock(float2 uv)
 {	
@@ -173,12 +187,47 @@ bool isGameOver()
 	
 }
 
+
+
+/*colorDistLAB*/
+
+float3 rgb2lab(float4 rgb){
+  float x, y, z;
+  float r = rgb.r;
+  float g = rgb.g;
+  float b = rgb.b;
+  r = (r > 0.04045) ? pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+  g = (g > 0.04045) ? pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+  b = (b > 0.04045) ? pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
+  x = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
+  y = (r * 0.2126 + g * 0.7152 + b * 0.0722) / 1.00000;
+  z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+  x = (x > 0.008856) ? pow(x, 1/3) : (7.787 * x) + 16/116;
+  y = (y > 0.008856) ? pow(y, 1/3) : (7.787 * y) + 16/116;
+  z = (z > 0.008856) ? pow(z, 1/3) : (7.787 * z) + 16/116;
+  return float3((116 * y) - 16, 500 * (x - y), 200 * (y - z));
+}
+
+float deltaE(float4 rgbA, float4 rgbB) {
+  float3 labA = rgb2lab(rgbA);
+  float3 labB = rgb2lab(rgbB);
+  float deltaL = labA.r - labB.r;
+  float deltaA = labA.g - labB.g;
+  float deltaB = labA.b - labB.b;
+  
+  return sqrt(deltaL*deltaL +deltaA*deltaA + deltaB*deltaB);
+}
+/*end colorDistLAB*/
+
+
 float colorDist(float4 a, float4 b)
 {
+	//return deltaE(a,b);
 	float rDist = ((a.r-b.r)) * ((a.r-b.r));
 	float gDist = ((a.g-b.g)) * ((a.g-b.g));
 	float bDist = ((a.b-b.b)) * ((a.b-b.b));
 	return rDist+gDist+bDist;
+	
 }
 
 float4 setupDraw(float2 uv)
@@ -221,6 +270,55 @@ float4 setupDraw(float2 uv)
 	
 	return image.Sample(textureSampler, uv);
 	
+}
+
+//matches to closest colour out of entire palette
+float4 calculateColorFixed(float4 original)
+{
+	float4 result = float4(1.0,0.0,1.0,1.0);
+	float minDist = 1000000; //1+1+1 = 3 :D
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			float2 uv = float2((i+0.5)/10.0,(j+0.5)/2.0);
+			float4 c = fixed_palette_image.Sample(textureSampler, uv);
+			float dist = colorDist(c,original);
+			if (dist < minDist) {
+				minDist = dist;
+				result = c;
+			}			
+		}		
+	}
+	
+	return result;
+}
+
+//first figures out what level we are on. Then picks out of the current
+//level's colours
+float4 calculateColorFixedStat(float4 original)
+{
+	//first, calculate which level we are...
+	float4 primary = float4(1.0,0.0,1.0,1.0);
+	float4 secondary = float4(1.0,0.0,1.0,1.0);
+	float4 p1 = palette1();
+	float4 p2 = palette2();
+	float minDist = 1000000; //1+1+1 = 3 :D
+	for (int i = 0; i < 10; i++)
+	{		
+		float2 uv1 = float2((i+0.5)/10.0,0.25);
+		float2 uv2 = float2((i+0.5)/10.0,0.75);
+		float4 c1 = fixed_palette_image.Sample(textureSampler, uv1);
+		float4 c2 = fixed_palette_image.Sample(textureSampler, uv2);
+		float dist = colorDist(c1,p1) + colorDist(c2,p2);
+		if (dist < minDist) {
+			minDist = dist;
+			primary = c1;
+			secondary = c2;
+		}				
+	}
+	
+	return matchPalette(primary,secondary,original);
 }
 
 float4 mainImage(VertData v_in) : TARGET
@@ -268,19 +366,23 @@ float4 mainImage(VertData v_in) : TARGET
 			} else {
 				avg = sampleEdge(float2(centrexUv,centreyUv));
 			}
+						
+			if (fixed_palette) 
+			{
+				avg = calculateColorFixedStat(avg);
+			}
+						
 			return blockTex(true, blockUv, avg);
 		} else {							
 			if (stat_palette) {
-				float4 p1 = palette1();
-				float4 p2 = palette2();
-				float dist1 = colorDist(p1,avg);
-				float dist2 = colorDist(p2,avg);
-				if (dist1 < dist2) {
-					avg = p1;
-				} else {
-					avg = p2;
-				}
+				avg = matchPalette(palette1(),palette2(),avg);
 			}
+			
+			if (fixed_palette) 
+			{
+				avg = calculateColorFixedStat(avg);
+			}
+			
 			return blockTex(false, blockUv, avg);
 		}
 		
