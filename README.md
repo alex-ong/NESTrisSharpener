@@ -44,7 +44,13 @@ This section defines where your field is. Values range from 0 to 256. You can us
 # stat_palette_white, stat_palette, fixed_palette
 Enabling stat_palette_white means white blocks with coloured borders get their color from the statistics bar on the left.
 This results in uniform looking white blocks.
+
 stat_palette is the same thing, but for fully coloured blocks.
+
+fixed_palette uses a pre-defined palette to compare against. 
+
+Look at palette options (bottom of this page) for more details.
+
 
 | Name                 | default value    | 
 | -------------        |---------------   |
