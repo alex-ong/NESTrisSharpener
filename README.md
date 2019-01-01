@@ -93,6 +93,9 @@ If we detect black in both locations specified as well as grey in the bottom lef
 
 
 # Palette options (advanced, higher quality)
+
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/palette-comparison.png)
+
 Here is a more detailed explanation of how the palette options work.
 
 * stat_palette_white - "white" blocks get their border color from the statistics window to the left of playfield. Disabling this attemps to calculate border color from the block itself, though usually ends up being too grey.
