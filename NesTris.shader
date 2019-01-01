@@ -188,20 +188,19 @@ bool isGameOver()
 }
 
 
-
-//There have been many attempts to weight RGB values to better fit human perception, 
-//where the components are commonly weighted (red 30%, green 59%, and blue 11%), 
-//however these are demonstratively worse at color determinations and are properly 
-//the contributions to the brightness of these colors, rather than to the degree to which human 
-//vision has less tolerance for these colors. 
-//The closer approximations would be more properly coefficients of 2, 4, and 3
-float colorDist(float4 a, float4 b)
-{
-	float rDist = 2* ((a.r-b.r)) * ((a.r-b.r));
-	float gDist = 4*((a.g-b.g)) * ((a.g-b.g));
-	float bDist = 3*((a.b-b.b)) * ((a.b-b.b));
-	return rDist+gDist+bDist;
-	
+//Low cost color distance
+//https://www.compuphase.com/cmetric.htm
+float colorDist(float4 e1, float4 e2)
+{	
+	float r = (e1.r-e2.r);
+	float g = (e1.g-e2.g);
+	float b = (e1.b-e2.b);
+	float rMean = (e1.r+e2.r)/2.0;
+	if (rMean > 0.5) {
+		return 3*r*r + 4*g*g + 2*b*b;
+	} else {
+		return 2*r*r + 4*g*g + 3*b*b;
+	}
 }
 
 float4 setupDraw(float2 uv)
