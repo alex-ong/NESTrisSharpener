@@ -1,6 +1,7 @@
 # NESTrisSharpener
 A simple OBS shader for upscaling graphics.
 
+# Download and installation
 1) Download and install this plugin:
 * Download: https://github.com/nleseul/obs-shaderfilter/releases
 * Install: read this - https://github.com/nleseul/obs-shaderfilter/
@@ -10,8 +11,18 @@ A simple OBS shader for upscaling graphics.
 5) Add a new "User-defined shader"
 6) Shader Text file -> Browse -> Nestris.shader
 7) block_image  -> Browse -> blocks.png
+8) 
 
-# Calibration
+# Interlacing
+Note that this shader assumes a perfectly deinterlaced image.
+Below is a problem that is not solvable if your image is interlaced - we can't figure out the block because the image isn't clean:
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/interlaced.png)
+
+* The easiest way to de-interlace your image is to select your video source, choose de-interlace, and select "retro".
+* Next, if the game image bobs up and down violently, you'll have to select the "first" field and change it.
+
+
+# Calibration (quick-setup)
 Now, we will quickly calibrate the image
 * First, make sure your video source is only game image, with no borders. If it isn't aligned properly, try to add a crop/pad filter before this in the chain, so that it lines up.
 * Next, we have to set all the appropriate values. Below are descriptions of sections and some default values that work well.
@@ -21,7 +32,7 @@ Now, we will quickly calibrate the image
 tick this to set calibration up. when you are done, untick it.
 
 # Field
-This section defines where your field is. Values range from 0 to 256. You can use half-pixels.
+This section defines where your field is. Values range from 0 to 256. You can use fractions of pixels.
 
 | Name           | default value | 
 | -------------  |---------------|
@@ -30,7 +41,7 @@ This section defines where your field is. Values range from 0 to 256. You can us
 | field_top_y    | 39            |
 | field_bottom_y | 200           |
 
-# stat_palette white, stat_palette
+# stat_palette_white, stat_palette, fixed_palette
 Enabling stat_palette_white means white blocks with coloured borders get their color from the statistics bar on the left.
 This results in uniform looking white blocks.
 stat_palette is the same thing, but for fully coloured blocks.
@@ -39,9 +50,10 @@ stat_palette is the same thing, but for fully coloured blocks.
 | -------------        |---------------   |
 | stat_palette_white   | true (ticked)    |
 | stat_palette         | false (unticked) |
+| fixed_palette        | false (unticked) |
 
 # paletteA1, paletteA2, paletteB1, paletteB2
-If you have stat_palette_white or stat_palette enabled, you can set the locations of some reference blocks in the image.
+If you have stat_palette_white, stat_palette or fixed_palette enabled, you can set the locations of some reference blocks in the image.
 
 | Name           | default value | 
 | -------------  |---------------|
@@ -78,5 +90,16 @@ The next settings are the locations of a few squares that we use to figure out i
 | game_grey_y1          | 219|
 
 If we detect black in both locations specified as well as grey in the bottom left corner, we assume that we aren't in a menu.
+
+
+# Palette options
+Here is a more detailed explanation of how the palette options work.
+
+* stat_palette_white - "white" blocks get their border color from the statistics window to the left of playfield. Disabling this attemps to calculate border color from the block itself, though usually ends up being too grey.
+* stat_palette - non-white blocks get their fill color from the statistics window to the left of playfield. Enabling this will lead to more uniform colors. Disabling this will lead to more variance in block colors.
+* fixed_palette - First, looks at statistics window to figure out which level we are on. Compares colors in statistics window to fixed_palette_image. After this, looks at the block and matches it between the valid colors for that level. Note that for this option to work correctly, you should first record a video of the first ten levels. Then get the block colors for each of your levels and calibrate the fixed_palette file.
+
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/palette-calibration.png)
+
 
 
