@@ -11,7 +11,7 @@ A simple OBS shader for upscaling graphics.
 5) Add a new "User-defined shader"
 6) Shader Text file -> Browse -> Nestris.shader
 7) block_image  -> Browse -> blocks.png
-8) 
+8) fixed_palette_image -> Browse -> fixed_palette.png
 
 # Interlacing
 Note that this shader assumes a perfectly deinterlaced image.
@@ -92,14 +92,14 @@ The next settings are the locations of a few squares that we use to figure out i
 If we detect black in both locations specified as well as grey in the bottom left corner, we assume that we aren't in a menu.
 
 
-# Palette options
+# Palette options (advanced, higher quality)
 Here is a more detailed explanation of how the palette options work.
 
 * stat_palette_white - "white" blocks get their border color from the statistics window to the left of playfield. Disabling this attemps to calculate border color from the block itself, though usually ends up being too grey.
 * stat_palette - non-white blocks get their fill color from the statistics window to the left of playfield. Enabling this will lead to more uniform colors. Disabling this will lead to more variance in block colors.
 * fixed_palette - First, looks at statistics window to figure out which level we are on. Compares colors in statistics window to fixed_palette_image. After this, looks at the block and matches it between the valid colors for that level. Note that for this option to work correctly, you should first record a video of the first ten levels. Then get the block colors for each of your levels and calibrate the fixed_palette file.
 
-![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/palette-calibration.png)
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/palette-calibrate.png)
 
 
 
