@@ -21,6 +21,14 @@ uniform float paletteB_y1;
 uniform float paletteB_x2;
 uniform float paletteB_y2;
 
+uniform bool sharpen_stats;
+uniform texture2d stats_image;
+uniform float stat_t_top_y;
+uniform float stat_i_left_x;
+uniform float stat_i_right_x;
+uniform float stat_i_bottom_y;
+
+
 uniform bool skip_detect_game;
 uniform bool skip_detect_game_over;
 
@@ -30,6 +38,80 @@ uniform float game_black_x2;
 uniform float game_black_y2;
 uniform float game_grey_x1;
 uniform float game_grey_y1;
+
+
+
+float3 closest_stat(float2 uv)
+{
+    const float2 test[28] = {
+    float2(0.195, 0.023), //T
+    float2(0.456, 0.023),
+    float2(0.717, 0.023),
+    float2(0.456, 0.080),
+
+    float2(0.324, 0.486),//O
+    float2(0.574, 0.486),
+    float2(0.324, 0.543),
+    float2(0.574, 0.543),
+    
+    float2(0.109, 0.976), //I
+    float2(0.370, 0.976),
+    float2(0.631, 0.976),
+    float2(0.892, 0.976),
+    
+    float2(0.195, 0.170),//J
+    float2(0.456, 0.170),
+    float2(0.717, 0.170),
+    float2(0.717, 0.227),
+
+    float2(0.456, 0.642), //S
+    float2(0.717, 0.642),
+    float2(0.195, 0.699),
+    float2(0.456, 0.699),
+    
+    float2(0.195, 0.332),//Z
+    float2(0.456, 0.332),
+    float2(0.456, 0.389),
+    float2(0.717, 0.389),
+
+    float2(0.195, 0.786),//L
+    float2(0.456, 0.786),
+    float2(0.717, 0.786),
+    float2(0.195, 0.843)};
+
+
+    
+    float min_dist = ((uv.x-test[0].x)*(uv.x-test[0].x) +
+                      (uv.y-test[0].y)*(uv.y-test[0].y));
+    int result = 27;
+    
+    for (int i = 1; i < 28; i++)
+    {
+        float xDist = uv.x-test[i].x;
+        float yDist = uv.y-test[i].y;
+        float dist = xDist*xDist+yDist*yDist;
+        if (dist < min_dist)
+        {
+            min_dist = dist;
+            result = i;
+        }
+    }
+    return float3(test[result].x,test[result].y,i/4);
+}
+bool blockStatIsWhite(int id)
+{
+    return id < 3;
+}
+
+bool blockStatIsCol1(int id)
+{
+    return 3 <= id && id < 4 ;
+}
+
+bool blockStatIsCol2(int id)
+{
+    return id >= 4;
+}
 
 bool inBox(float2 uv) {	
 	float startX = field_left_x / 256.0;
@@ -71,6 +153,11 @@ float4 gameBlack1_box(){ return pixBox(gameBlack1_uv(), 2);}
 float4 gameBlack2_box(){ return pixBox(gameBlack2_uv(), 2);}
 float4 gameGrey1_box() { return pixBox(gameGrey1_uv(), 2);}
 
+float4 stat_box() { return float4(stat_i_left_x / 256.0,
+                                  stat_i_right_x / 256.0,
+                                  stat_t_top_y / 224.0,
+                                  stat_i_bottom_y / 224.0); }
+                                  
 //width as portion of full screen width.
 float blockWidth() {
 	return (field_right_x - field_left_x) / 10.0 / 256.0;
@@ -79,6 +166,7 @@ float blockWidth() {
 float blockHeight() {
 	return (field_bottom_y - field_top_y) / 20.0 / 224.0;
 }
+
 
 float4 blockTex(bool white, float2 uv, float4 base) {	
 	if (!white) {	
@@ -136,7 +224,7 @@ float4 matchPalette(float4 p1, float4 p2, float4 col)
 	}
 }
 
-//Simple 4 sample of centre of 8x8 block
+//Simple 4 sample of centre of 3x3 block
 float4 sampleBlock(float2 uv)
 {	
 	float4 centre = image.Sample(textureSampler, uv);
@@ -149,6 +237,7 @@ float4 sampleBlock(float2 uv)
 	//avg = centre;
 	return avg;
 }
+
 
 //Simple top/bottom edge sample of 8x8 block.
 float4 sampleEdge(float2 uv)
@@ -222,13 +311,20 @@ float4 setupDraw(float2 uv)
 		}
 		else if (inBox2(uv, paletteB1_box()))	
 		{
-			return (float4(1.0,1.0,0.0,1.0));	
+			return (float4(1.0,0.0,0.0,1.0));	
 		}
 		else if (inBox2(uv, paletteB2_box()))	
 		{
-			return (float4(1.0,1.0,0.0,1.0));	
+			return (float4(1.0,0.0,0.0,1.0));	
 		}
 	}
+    
+    if (sharpen_stats) {
+        if (inBox2(uv, stat_box()))
+        {
+            return (float4(0.3,0.3,1.0,1.0) + orig) / 2.0;
+        }
+    }
 	
 	if (!skip_detect_game) 
 	{
@@ -359,7 +455,37 @@ float4 mainImage(VertData v_in) : TARGET
 			return blockTex(false, blockUv, avg);
 		}
 		
-	} else { //not in play area.	
+	} else if (sharpen_stats && inBox2(uv,stat_box())) {        
+        float width = (stat_i_right_x - stat_i_left_x) / 256.0;
+        float height = (stat_i_bottom_y - stat_t_top_y) / 224.0;
+        if (width == 0 || height == 0) 
+        {
+            return image.Sample(textureSampler, v_in.uv);
+        }
+        
+        float xPerc = (uv.x - stat_i_left_x / 256.0) / width;
+        float yPerc = (uv.y - stat_t_top_y / 224.0) / height;
+        float4 raw_pix = stats_image.Sample(textureSampler, float2(xPerc,yPerc));
+        if ((isBlack(raw_pix) || isWhite(raw_pix)) && raw_pix.a > 0.0)
+        {
+            return raw_pix;
+        } else {
+            float3 block_uv = closest_stat(uv);
+            
+            float4 col = sampleBlock(float2(block_uv.x,block_uv.y));
+            if (stat_palette) {
+                col = matchPalette(palette1(), palette2(), col);
+            }
+            
+            if (fixed_palette)
+            {
+                col = calculateColorFixedStat(col);
+            }
+            return col;
+        }
+        
+        
+    } else {
 		return image.Sample(textureSampler, v_in.uv);
 	}	
 }

@@ -14,6 +14,10 @@ paletteB_y1 = 120.00
 paletteB_x2 = 30.00
 paletteB_y2 = l67.00
 
+stat_t_top_y = 87
+stat_i_left_x = 24
+stat_i_right_x = 47
+stat_i_bottom_y = 185
 
 game_black_x1 = 98.00
 game_black_y1 = 19.00	
