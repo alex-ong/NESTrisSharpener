@@ -124,5 +124,8 @@ Here is a more detailed explanation of how the palette options work.
 
 ![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/palette-calibrate.png)
 
+# Conclusion
+I hope that this project helped sharpen your video capture / streaming! If you liked this project, please star this project!
 
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/starme.png)
 
