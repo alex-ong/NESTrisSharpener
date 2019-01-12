@@ -54,10 +54,10 @@ float3 closest_stat(float2 uv)
     float2(0.727, 0.023),
     float2(0.456, 0.080),
 
-    float2(0.334, 0.480),//O
-    float2(0.594, 0.480),
-    float2(0.334, 0.538),
-    float2(0.594, 0.538),
+    float2(0.334, 0.486),//O
+    float2(0.594, 0.486),
+    float2(0.334, 0.546),
+    float2(0.594, 0.546),
     
     float2(0.109, 0.976), //I
     float2(0.370, 0.976),
@@ -74,15 +74,15 @@ float3 closest_stat(float2 uv)
     float2(0.195, 0.695),
     float2(0.456, 0.695),
     
-    float2(0.195, 0.327),//Z
-    float2(0.456, 0.327),
-    float2(0.456, 0.384),
-    float2(0.727, 0.384),
+    float2(0.195, 0.329),//Z
+    float2(0.456, 0.329),
+    float2(0.456, 0.386),
+    float2(0.727, 0.386),
 
-    float2(0.195, 0.780),//L
-    float2(0.456, 0.780),
-    float2(0.727, 0.780),
-    float2(0.195, 0.838)};
+    float2(0.195, 0.782),//L
+    float2(0.456, 0.782),
+    float2(0.727, 0.782),
+    float2(0.195, 0.840)};
 
 
     float min_dist = distPoints(uv,test[0]);
@@ -134,6 +134,12 @@ float4 pixBox(float2 uv, int pixels)
 {
 	return float4(uv.x - pixels / 256.0, uv.x + pixels/256.0,
 				  uv.y - pixels / 224.0, uv.y + pixels/224.0);
+}
+
+float4 pixBoxStat(float2 uv, int pixels)
+{
+	return float4(uv.x - pixels / 23.0, uv.x + pixels/23.0,
+				  uv.y - pixels / 104.0, uv.y + pixels/104.0);
 }
 
 float2 paletteA1_uv(){ return float2(paletteA_x1 / 256.0, paletteA_y1 / 224.0);}
@@ -250,6 +256,15 @@ float4 sampleEdge(float2 uv)
 	return (top + bottom) / 2.0;
 }
 
+float4 sampleEdgeStat(float2 uv)
+{
+	float topyUv = uv.y + 1.5/224.0;
+	float bottomyUv = uv.y - 2.5/224.0;
+	float4 top = image.Sample(textureSampler, float2(uv.x, topyUv));
+	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));			
+	return (top + bottom) / 2.0;
+}
+
 bool isInGame()
 {
 	float4 black1 = sampleBlock(gameBlack1_uv()); //black box next to "LINES";
@@ -328,8 +343,8 @@ float4 setupDraw(float2 uv)
 			float xPerc = (uv.x - stat_i_left_x / 256.0) / width;
 			float yPerc = (uv.y - stat_t_top_y / 224.0) / height;
 			float3 a = closest_stat(float2(xPerc,yPerc));
-			if (inBox2(float2(xPerc,yPerc),pixBox(float2(a.x,a.y),4))) {
-				return float4(1.0,0.0,1.0,1.0);
+			if (inBox2(float2(xPerc,yPerc),pixBoxStat(float2(a.x,a.y),1))) {
+				return (float4(1.0,1.0,0.0,0.2) + orig);
 			}
 			
             return (float4(0.3,0.3,1.0,1.0) + orig) / 2.0;
@@ -489,11 +504,15 @@ float4 mainImage(VertData v_in) : TARGET
             float4 col = sampleBlock(global_uv);
 			int blockType = round(block_uv.z);			
 			
-			if (stat_palette_white) {
-				if (blockStatIsWhite(blockType)) {
-					col = palette1();
+			if (blockStatIsWhite(blockType)) 
+			{
+				if (stat_palette_white) {
+					col = palette1();					
+				} else {
+					col = sampleEdgeStat(global_uv);
 				}
 			}
+			
 			
             if (stat_palette) {
                 col = matchPalette(palette1(), palette2(), col);

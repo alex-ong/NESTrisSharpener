@@ -36,10 +36,10 @@ This section defines where your field is. Values range from 0 to 256. You can us
 
 | Name           | default value | 
 | -------------  |---------------|
-| field_left_x   | 97            |
+| field_left_x   | 96            |
 | field_right_x  | 176           |
-| field_top_y    | 39            |
-| field_bottom_y | 200           |
+| field_top_y    | 43            |
+| field_bottom_y | 196           |
 
 # stat_palette_white, stat_palette, fixed_palette
 Enabling stat_palette_white means white blocks with coloured borders get their color from the statistics bar on the left.
@@ -64,16 +64,30 @@ If you have stat_palette_white, stat_palette or fixed_palette enabled, you can s
 | Name           | default value | 
 | -------------  |---------------|
 | paletteA_x1    | 30            |
-| paletteA_y1    | 103           |
+| paletteA_y1    | 104           |
 | paletteA_x2    | 30            |
-| paletteA_y2    | 158           |
+| paletteA_y2    | 156           |
 
 | Name           | default value | 
 | -------------  |---------------|
 | paletteB_x1    | 30            |
 | paletteB_y1    | 120           |
 | paletteB_x2    | 30            |
-| paletteB_y2    | 167           |
+| paletteB_y2    | 170           |
+
+# sharpen_stats
+This section enables the sharpening of your statistics window
+
+| Name           | default value   |
+| -------------- | -------------   |
+| sharpen_stats  | true (ticked)   |
+| stats_image    | blocks-stat.png |
+| stat_t_top_y   | 87              |
+| stat_i_left_x  | 24              |
+| stat_i_right_x | 47              |
+| stat_t_bottom_y| 185             |
+
+The algorithm for sharpening stats is the same as for your field. This means for best results, use and calibrate fixed_palette.
 
 # game / menu detection
 skip_detect_game - if you tick this, we will always be in game mode. if it is un-ticked, we check for menus.
@@ -89,11 +103,11 @@ The next settings are the locations of a few squares that we use to figure out i
 | Name                  | default value   | 
 | -------------         |-----------------|
 | game_black_x1         | 98|
-| game_black_y1         | 19|
-| game_black_x2         | 238|
-| game_black_y2         | 16|
-| game_grey_x1          | 13|
-| game_grey_y1          | 219|
+| game_black_y1         | 26|
+| game_black_x2         | 240|
+| game_black_y2         | 24|
+| game_grey_x1          | 36|
+| game_grey_y1          | 214|
 
 If we detect black in both locations specified as well as grey in the bottom left corner, we assume that we aren't in a menu.
 
