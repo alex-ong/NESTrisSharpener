@@ -39,57 +39,58 @@ uniform float game_black_y2;
 uniform float game_grey_x1;
 uniform float game_grey_y1;
 
-
+float distPoints(float2 a, float2 b)
+{
+	return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)*20.43;
+	//4.5 is inverse aspect ratio of stats png... square it to get 20.43
+	//we have to multiply to convert from uv to pixel distance.
+}
 
 float3 closest_stat(float2 uv)
 {
     const float2 test[28] = {
     float2(0.195, 0.023), //T
     float2(0.456, 0.023),
-    float2(0.717, 0.023),
+    float2(0.727, 0.023),
     float2(0.456, 0.080),
 
-    float2(0.324, 0.486),//O
-    float2(0.574, 0.486),
-    float2(0.324, 0.543),
-    float2(0.574, 0.543),
+    float2(0.334, 0.480),//O
+    float2(0.594, 0.480),
+    float2(0.334, 0.538),
+    float2(0.594, 0.538),
     
     float2(0.109, 0.976), //I
     float2(0.370, 0.976),
     float2(0.631, 0.976),
     float2(0.892, 0.976),
     
-    float2(0.195, 0.170),//J
-    float2(0.456, 0.170),
-    float2(0.717, 0.170),
-    float2(0.717, 0.227),
+    float2(0.195, 0.165),//J
+    float2(0.456, 0.165),
+    float2(0.727, 0.165),
+    float2(0.727, 0.220),
 
-    float2(0.456, 0.642), //S
-    float2(0.717, 0.642),
-    float2(0.195, 0.699),
-    float2(0.456, 0.699),
+    float2(0.456, 0.637), //S
+    float2(0.727, 0.637),
+    float2(0.195, 0.695),
+    float2(0.456, 0.695),
     
-    float2(0.195, 0.332),//Z
-    float2(0.456, 0.332),
-    float2(0.456, 0.389),
-    float2(0.717, 0.389),
+    float2(0.195, 0.327),//Z
+    float2(0.456, 0.327),
+    float2(0.456, 0.384),
+    float2(0.727, 0.384),
 
-    float2(0.195, 0.786),//L
-    float2(0.456, 0.786),
-    float2(0.717, 0.786),
-    float2(0.195, 0.843)};
+    float2(0.195, 0.780),//L
+    float2(0.456, 0.780),
+    float2(0.727, 0.780),
+    float2(0.195, 0.838)};
 
 
-    
-    float min_dist = ((uv.x-test[0].x)*(uv.x-test[0].x) +
-                      (uv.y-test[0].y)*(uv.y-test[0].y));
+    float min_dist = distPoints(uv,test[0]);
     int result = 0;
     
     for (int i = 1; i < 28; i++)
     {
-        float xDist = uv.x-test[i].x;
-        float yDist = uv.y-test[i].y;
-        float dist = xDist*xDist+yDist*yDist;
+        float dist = distPoints(uv,test[i]);
         if (dist < min_dist)
         {
             min_dist = dist;
@@ -322,6 +323,15 @@ float4 setupDraw(float2 uv)
     if (sharpen_stats) {
         if (inBox2(uv, stat_box()))
         {
+			float width = (stat_i_right_x - stat_i_left_x) / 256.0;
+			float height = (stat_i_bottom_y - stat_t_top_y) / 224.0;
+			float xPerc = (uv.x - stat_i_left_x / 256.0) / width;
+			float yPerc = (uv.y - stat_t_top_y / 224.0) / height;
+			float3 a = closest_stat(float2(xPerc,yPerc));
+			if (inBox2(float2(xPerc,yPerc),pixBox(float2(a.x,a.y),4))) {
+				return float4(1.0,0.0,1.0,1.0);
+			}
+			
             return (float4(0.3,0.3,1.0,1.0) + orig) / 2.0;
         }
     }
@@ -477,12 +487,14 @@ float4 mainImage(VertData v_in) : TARGET
 			float2 global_uv = float2(stat_i_left_x/256.0 + local_uv.x * width,
 									  stat_t_top_y/224.0 + local_uv.y * height);
             float4 col = sampleBlock(global_uv);
-			int blockType = round(block_uv.z);
+			int blockType = round(block_uv.z);			
+			
 			if (stat_palette_white) {
 				if (blockStatIsWhite(blockType)) {
 					col = palette1();
 				}
 			}
+			
             if (stat_palette) {
                 col = matchPalette(palette1(), palette2(), col);
             }
@@ -491,11 +503,12 @@ float4 mainImage(VertData v_in) : TARGET
             {
                 if (blockStatIsWhite(blockType) || blockStatIsCol1(blockType))
 				{
-					return palette1();
+					return calculateColorFixedStat(palette1());
 				} else {
-					return palette2();
+					return calculateColorFixedStat(palette2());
 				}
             }
+			
             return col;
 			
         }
