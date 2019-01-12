@@ -105,12 +105,12 @@ bool blockStatIsWhite(int id)
 
 bool blockStatIsCol1(int id)
 {
-    return 3 <= id && id < 4 ;
+    return 3 <= id && id <= 4 ;
 }
 
 bool blockStatIsCol2(int id)
 {
-    return id >= 4;
+    return id > 4;
 }
 
 bool inBox(float2 uv) {	
