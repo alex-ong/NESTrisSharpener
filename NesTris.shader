@@ -83,7 +83,7 @@ float3 closest_stat(float2 uv)
     
     float min_dist = ((uv.x-test[0].x)*(uv.x-test[0].x) +
                       (uv.y-test[0].y)*(uv.y-test[0].y));
-    int result = 27;
+    int result = 0;
     
     for (int i = 1; i < 28; i++)
     {
@@ -96,7 +96,7 @@ float3 closest_stat(float2 uv)
             result = i;
         }
     }
-    return float3(test[result].x,test[result].y,i/4);
+    return float3(test[result].x,test[result].y,result/4);
 }
 bool blockStatIsWhite(int id)
 {
@@ -470,18 +470,34 @@ float4 mainImage(VertData v_in) : TARGET
         {
             return raw_pix;
         } else {
-            float3 block_uv = closest_stat(uv);
-            
-            float4 col = sampleBlock(float2(block_uv.x,block_uv.y));
+            float3 block_uv = closest_stat(float2(xPerc,yPerc));
+					
+			float2 local_uv = float2(block_uv.x, block_uv.y); //localspace
+			//convert to world space
+			float2 global_uv = float2(stat_i_left_x/256.0 + local_uv.x * width,
+									  stat_t_top_y/224.0 + local_uv.y * height);
+            float4 col = sampleBlock(global_uv);
+			int blockType = round(block_uv.z);
+			if (stat_palette_white) {
+				if (blockStatIsWhite(blockType)) {
+					col = palette1();
+				}
+			}
             if (stat_palette) {
                 col = matchPalette(palette1(), palette2(), col);
             }
             
             if (fixed_palette)
             {
-                col = calculateColorFixedStat(col);
+                if (blockStatIsWhite(blockType) || blockStatIsCol1(blockType))
+				{
+					return palette1();
+				} else {
+					return palette2();
+				}
             }
             return col;
+			
         }
         
         

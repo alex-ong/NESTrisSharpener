@@ -22,7 +22,7 @@ stat_i_bottom_y = 185
 game_black_x1 = 98.00
 game_black_y1 = 19.00	
 game_black_x2 = 238.00
-game_black_y2 = 16.00
+game_black_y2 = 24.00
 game_grey_x1 = 13.00
 game_grey_y2 = 219.00
 	
