@@ -1,3 +1,4 @@
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/hero-image.png)
 # NESTrisSharpener
 A simple OBS shader for upscaling graphics.
 
