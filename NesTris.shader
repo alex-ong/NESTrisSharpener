@@ -39,6 +39,9 @@ uniform float game_black_y2;
 uniform float game_grey_x1;
 uniform float game_grey_y1;
 
+uniform texture2d ctm_image;
+uniform bool show_ctm;
+
 float distPoints(float2 a, float2 b)
 {
 	return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)*20.43;
@@ -533,6 +536,13 @@ float4 mainImage(VertData v_in) : TARGET
         }
         
         
+    } else if (show_ctm) { 
+        float4 mask_pix = ctm_image.Sample(textureSampler,v_in.uv);
+        if (raw_pix.a <= 0.1) {
+            return image.Sample(textureSampler, v_in.uv);
+        } else {
+            return mask_pix;
+        }
     } else {
 		return image.Sample(textureSampler, v_in.uv);
 	}	
