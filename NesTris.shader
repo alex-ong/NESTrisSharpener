@@ -417,7 +417,15 @@ float4 calculateColorFixedStat(float4 original)
 	
 	return matchPalette(primary,secondary,original);
 }
-
+float4 do_show_ctm(float2 uv)
+{
+	float4 mask_pix = ctm_image.Sample(textureSampler,uv);
+	if (mask_pix.a <= 0.1) {
+		return image.Sample(textureSampler, uv);
+	} else {
+		return mask_pix;
+	}
+}
 float4 mainImage(VertData v_in) : TARGET
 {	
 	float2 uv = v_in.uv;
@@ -428,6 +436,9 @@ float4 mainImage(VertData v_in) : TARGET
 	if (!skip_detect_game) 
 	{	
 		if (!isInGame()) {
+			if (show_ctm) { 
+				return do_show_ctm(uv);
+			}
 			return image.Sample(textureSampler,uv);	
 		}			
 	}
@@ -534,15 +545,7 @@ float4 mainImage(VertData v_in) : TARGET
             return col;
 			
         }
-        
-        
-    } else if (show_ctm) { 
-        float4 mask_pix = ctm_image.Sample(textureSampler,v_in.uv);
-        if (raw_pix.a <= 0.1) {
-            return image.Sample(textureSampler, v_in.uv);
-        } else {
-            return mask_pix;
-        }
+
     } else {
 		return image.Sample(textureSampler, v_in.uv);
 	}	
