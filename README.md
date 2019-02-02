@@ -125,6 +125,10 @@ Here is a more detailed explanation of how the palette options work.
 
 ![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/palette-calibrate.png)
 
+# menu overlay
+menu_overlay - image that you want to display during menu screens
+show_menu_overlay - whether to enable the overlay during menus
+
 # Conclusion
 I hope that this project helped sharpen your video capture / streaming! If you liked this project, please star this project!
 

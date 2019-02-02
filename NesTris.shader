@@ -39,8 +39,8 @@ uniform float game_black_y2;
 uniform float game_grey_x1;
 uniform float game_grey_y1;
 
-uniform texture2d ctm_image;
-uniform bool show_ctm;
+uniform texture2d menu_overlay;
+uniform bool show_menu_overlay;
 
 float distPoints(float2 a, float2 b)
 {
@@ -417,9 +417,9 @@ float4 calculateColorFixedStat(float4 original)
 	
 	return matchPalette(primary,secondary,original);
 }
-float4 do_show_ctm(float2 uv)
+float4 do_show_menu_overlay(float2 uv)
 {
-	float4 mask_pix = ctm_image.Sample(textureSampler,uv);
+	float4 mask_pix = menu_overlay.Sample(textureSampler,uv);
 	if (mask_pix.a <= 0.1) {
 		return image.Sample(textureSampler, uv);
 	} else {
@@ -436,8 +436,8 @@ float4 mainImage(VertData v_in) : TARGET
 	if (!skip_detect_game) 
 	{	
 		if (!isInGame()) {
-			if (show_ctm) { 
-				return do_show_ctm(uv);
+			if (show_menu_overlay) { 
+				return do_show_menu_overlay(uv);
 			}
 			return image.Sample(textureSampler,uv);	
 		}			
