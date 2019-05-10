@@ -4,8 +4,8 @@ A simple OBS shader for upscaling graphics.
 
 # Download and installation
 1) Download and install this plugin:
-* Download: https://github.com/nleseul/obs-shaderfilter/releases
-* Install: read this - https://github.com/nleseul/obs-shaderfilter/
+* Download: https://github.com/Oncorporation/obs-shaderfilter/releases
+* Info/Install: read this - https://github.com/Oncorporation/obs-shaderfilter (tl;dr unzip to correct place and override)
 2) Download this repository by clicking this [link](https://github.com/alex-ong/NESTrisSharpener/archive/master.zip), and then unzipping it somewhere.
 3) Open OBS. Add your video source (i.e. NES Tetris composite AV signal, or youtube screen capture, or whatever)
 3) Add filter... (right click on video source, hit "filter")
@@ -30,7 +30,7 @@ Now, we will quickly calibrate the image
 
 ![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/calibration.png)
 # setup_mode
-tick this to set calibration up. when you are done, untick it.
+This is ticked by default, to set calibration up. when you are done, untick it.
 
 # Field
 This section defines where your field is. Values range from 0 to 256. You can use fractions of pixels.

@@ -1,43 +1,43 @@
 uniform texture2d block_image;
 
-uniform bool setup_mode;
-uniform float field_left_x;
-uniform float field_right_x;
-uniform float field_top_y;
-uniform float field_bottom_y;
+uniform bool setup_mode = true;
+uniform float field_left_x = 96;
+uniform float field_right_x = 176;
+uniform float field_top_y = 43;
+uniform float field_bottom_y = 196;
 
-uniform bool stat_palette_white;
+uniform bool stat_palette_white = true;
 uniform bool stat_palette;
 uniform bool fixed_palette;
 uniform texture2d fixed_palette_image;
 
-uniform float paletteA_x1;
-uniform float paletteA_y1;
-uniform float paletteA_x2;
-uniform float paletteA_y2;
+uniform float paletteA_x1 = 30;
+uniform float paletteA_y1 = 104;
+uniform float paletteA_x2 = 30;
+uniform float paletteA_y2 = 156;
 
-uniform float paletteB_x1;
-uniform float paletteB_y1;
-uniform float paletteB_x2;
-uniform float paletteB_y2;
+uniform float paletteB_x1 = 30;
+uniform float paletteB_y1 = 120;
+uniform float paletteB_x2 = 30;
+uniform float paletteB_y2 = 170;
 
 uniform bool sharpen_stats;
 uniform texture2d stats_image;
-uniform float stat_t_top_y;
-uniform float stat_i_left_x;
-uniform float stat_i_right_x;
-uniform float stat_i_bottom_y;
+uniform float stat_t_top_y = 87;
+uniform float stat_i_left_x = 24;
+uniform float stat_i_right_x = 47;
+uniform float stat_i_bottom_y = 185;
 
 
 uniform bool skip_detect_game;
 uniform bool skip_detect_game_over;
 
-uniform float game_black_x1;
-uniform float game_black_y1;
-uniform float game_black_x2;
-uniform float game_black_y2;
-uniform float game_grey_x1;
-uniform float game_grey_y1;
+uniform float game_black_x1 = 98;
+uniform float game_black_y1 = 26;
+uniform float game_black_x2 = 240;
+uniform float game_black_y2 = 24;
+uniform float game_grey_x1 = 36;
+uniform float game_grey_y1 = 214;
 
 uniform texture2d menu_overlay;
 uniform bool show_menu_overlay;
