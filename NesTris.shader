@@ -42,6 +42,10 @@ uniform float game_grey_y1 = 214;
 uniform texture2d menu_overlay;
 uniform bool show_menu_overlay;
 
+#define NES_WIDTH 256.0
+#define NES_HEIGHT 224.0
+#define NES_PIXEL_WIDTH NES_PIXEL_WIDTH
+#define NES_PIXEL_HEIGHT NES_PIXEL_HEIGHT
 float distPoints(float2 a, float2 b)
 {
 	return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)*20.43;
@@ -118,10 +122,10 @@ bool blockStatIsCol2(int id)
 }
 
 bool inBox(float2 uv) {	
-	float startX = field_left_x / 256.0;
-	float endX = field_right_x / 256.0;
-	float startY = field_top_y / 224.0;
-	float endY = field_bottom_y / 224.0;
+	float startX = field_left_x / NES_WIDTH;
+	float endX = field_right_x / NES_WIDTH;
+	float startY = field_top_y / NES_HEIGHT;
+	float endY = field_bottom_y / NES_HEIGHT;
 	return (uv.x > startX && uv.x < endX && uv.y > startY && uv.y < endY);
 }
 
@@ -135,8 +139,8 @@ bool inBox2(float2 uv, float4 box)
 
 float4 pixBox(float2 uv, int pixels)
 {
-	return float4(uv.x - pixels / 256.0, uv.x + pixels/256.0,
-				  uv.y - pixels / 224.0, uv.y + pixels/224.0);
+	return float4(uv.x - pixels / NES_WIDTH, uv.x + pixels/NES_WIDTH,
+				  uv.y - pixels / NES_HEIGHT, uv.y + pixels/NES_HEIGHT);
 }
 
 float4 pixBoxStat(float2 uv, int pixels)
@@ -145,36 +149,36 @@ float4 pixBoxStat(float2 uv, int pixels)
 				  uv.y - pixels / 104.0, uv.y + pixels/104.0);
 }
 
-float2 paletteA1_uv(){ return float2(paletteA_x1 / 256.0, paletteA_y1 / 224.0);}
-float2 paletteA2_uv(){ return float2(paletteA_x2 / 256.0, paletteA_y2 / 224.0);}
-float2 paletteB1_uv(){ return float2(paletteB_x1 / 256.0, paletteB_y1 / 224.0);}
-float2 paletteB2_uv(){ return float2(paletteB_x2 / 256.0, paletteB_y2 / 224.0);}
+float2 paletteA1_uv(){ return float2(paletteA_x1 / NES_WIDTH, paletteA_y1 / NES_HEIGHT);}
+float2 paletteA2_uv(){ return float2(paletteA_x2 / NES_WIDTH, paletteA_y2 / NES_HEIGHT);}
+float2 paletteB1_uv(){ return float2(paletteB_x1 / NES_WIDTH, paletteB_y1 / NES_HEIGHT);}
+float2 paletteB2_uv(){ return float2(paletteB_x2 / NES_WIDTH, paletteB_y2 / NES_HEIGHT);}
 
 float4 paletteA1_box(){	return pixBox(paletteA1_uv(), 1);}
 float4 paletteA2_box(){	return pixBox(paletteA2_uv(), 1);}
 float4 paletteB1_box(){	return pixBox(paletteB1_uv(), 1);}
 float4 paletteB2_box(){	return pixBox(paletteB2_uv(), 1);}
 
-float2 gameBlack1_uv() { return float2(game_black_x1 / 256.0, game_black_y1 / 224.0); }
-float2 gameBlack2_uv() { return float2(game_black_x2 / 256.0, game_black_y2 / 224.0); }
-float2 gameGrey1_uv() { return float2(game_grey_x1 / 256.0, game_grey_y1 / 224.0); }
+float2 gameBlack1_uv() { return float2(game_black_x1 / NES_WIDTH, game_black_y1 / NES_HEIGHT); }
+float2 gameBlack2_uv() { return float2(game_black_x2 / NES_WIDTH, game_black_y2 / NES_HEIGHT); }
+float2 gameGrey1_uv() { return float2(game_grey_x1 / NES_WIDTH, game_grey_y1 / NES_HEIGHT); }
 
 float4 gameBlack1_box(){ return pixBox(gameBlack1_uv(), 2);}
 float4 gameBlack2_box(){ return pixBox(gameBlack2_uv(), 2);}
 float4 gameGrey1_box() { return pixBox(gameGrey1_uv(), 2);}
 
-float4 stat_box() { return float4(stat_i_left_x / 256.0,
-                                  stat_i_right_x / 256.0,
-                                  stat_t_top_y / 224.0,
-                                  stat_i_bottom_y / 224.0); }
+float4 stat_box() { return float4(stat_i_left_x / NES_WIDTH,
+                                  stat_i_right_x / NES_WIDTH,
+                                  stat_t_top_y / NES_HEIGHT,
+                                  stat_i_bottom_y / NES_HEIGHT); }
                                   
 //width as portion of full screen width.
 float blockWidth() {
-	return (field_right_x - field_left_x) / 10.0 / 256.0;
+	return (field_right_x - field_left_x) / 10.0 / NES_WIDTH;
 }
 
 float blockHeight() {
-	return (field_bottom_y - field_top_y) / 20.0 / 224.0;
+	return (field_bottom_y - field_top_y) / 20.0 / NES_HEIGHT;
 }
 
 
@@ -238,11 +242,11 @@ float4 matchPalette(float4 p1, float4 p2, float4 col)
 float4 sampleBlock(float2 uv)
 {	
 	float4 centre = image.Sample(textureSampler, uv);
-	//float4 tl = image.Sample(textureSampler,float2(uv.x - 1/256.0, uv.y - 1/224.0));
-	float4 tr = image.Sample(textureSampler,float2(uv.x + 1/256.0, uv.y - 1/224.0));
-	float4 r = image.Sample(textureSampler,float2(uv.x + 1/256.0, uv.y));
-	float4 bl = image.Sample(textureSampler,float2(uv.x - 1/256.0, uv.y + 1/224.0));
-	float4 br = image.Sample(textureSampler,float2(uv.x + 1/256.0, uv.y + 1/224.0));
+	//float4 tl = image.Sample(textureSampler,float2(uv.x - NES_PIXEL_WIDTH, uv.y - NES_PIXEL_HEIGHT));
+	float4 tr = image.Sample(textureSampler,float2(uv.x + NES_PIXEL_WIDTH, uv.y - NES_PIXEL_HEIGHT));
+	float4 r = image.Sample(textureSampler,float2(uv.x + NES_PIXEL_WIDTH, uv.y));
+	float4 bl = image.Sample(textureSampler,float2(uv.x - NES_PIXEL_WIDTH, uv.y + NES_PIXEL_HEIGHT));
+	float4 br = image.Sample(textureSampler,float2(uv.x + NES_PIXEL_WIDTH, uv.y + NES_PIXEL_HEIGHT));
 	float4 avg = (tr + bl + br + centre + r) / 5.0;
 	//avg = centre;
 	return avg;
@@ -252,8 +256,8 @@ float4 sampleBlock(float2 uv)
 //Simple top/bottom edge sample of 8x8 block.
 float4 sampleEdge(float2 uv)
 {
-	float topyUv = uv.y + 2.5/224.0;
-	float bottomyUv = uv.y - 3.5/224.0;
+	float topyUv = uv.y + 2.5/NES_HEIGHT;
+	float bottomyUv = uv.y - 3.5/NES_HEIGHT;
 	float4 top = image.Sample(textureSampler, float2(uv.x, topyUv));
 	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));			
 	return (top + bottom) / 2.0;
@@ -261,8 +265,8 @@ float4 sampleEdge(float2 uv)
 
 float4 sampleEdgeStat(float2 uv)
 {
-	float topyUv = uv.y + 1.5/224.0;
-	float bottomyUv = uv.y - 2.5/224.0;
+	float topyUv = uv.y + 1.5/NES_HEIGHT;
+	float bottomyUv = uv.y - 2.5/NES_HEIGHT;
 	float4 top = image.Sample(textureSampler, float2(uv.x, topyUv));
 	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));			
 	return (top + bottom) / 2.0;
@@ -341,10 +345,10 @@ float4 setupDraw(float2 uv)
     if (sharpen_stats) {
         if (inBox2(uv, stat_box()))
         {
-			float width = (stat_i_right_x - stat_i_left_x) / 256.0;
-			float height = (stat_i_bottom_y - stat_t_top_y) / 224.0;
-			float xPerc = (uv.x - stat_i_left_x / 256.0) / width;
-			float yPerc = (uv.y - stat_t_top_y / 224.0) / height;
+			float width = (stat_i_right_x - stat_i_left_x) / NES_WIDTH;
+			float height = (stat_i_bottom_y - stat_t_top_y) / NES_HEIGHT;
+			float xPerc = (uv.x - stat_i_left_x / NES_WIDTH) / width;
+			float yPerc = (uv.y - stat_t_top_y / NES_HEIGHT) / height;
 			float3 a = closest_stat(float2(xPerc,yPerc));
 			if (inBox2(float2(xPerc,yPerc),pixBoxStat(float2(a.x,a.y),1))) {
 				return (float4(1.0,1.0,0.0,0.2) + orig);
@@ -453,15 +457,15 @@ float4 mainImage(VertData v_in) : TARGET
 	if (inBox(uv)) { //in play area		
 		float bw = blockWidth();
 		float bh = blockHeight();
-		float fblx = field_left_x/256.0;
-		float fbty = field_top_y /224.0;
+		float fblx = field_left_x/NES_WIDTH;
+		float fbty = field_top_y /NES_HEIGHT;
 		
 		float centrexUv = floor((uv.x - fblx) / bw) * bw + fblx + bw/2.0;		
 		float centreyUv = floor((uv.y - fbty) / bh) * bh + fbty + bh/2.0;
 		float2 centre = float2(centrexUv,centreyUv);
 		
-		float blockxUv = (((uv.x - fblx) * 256.0) % (bw * 256.0)) / (bw * 256.0);
-		float blockyUv = (((uv.y - fbty) * 224.0) % (bh * 224.0)) / (bh * 224.0);
+		float blockxUv = (((uv.x - fblx) * NES_WIDTH) % (bw * NES_WIDTH)) / (bw * NES_WIDTH);
+		float blockyUv = (((uv.y - fbty) * NES_HEIGHT) % (bh * NES_HEIGHT)) / (bh * NES_HEIGHT);
 		float2 blockUv = float2(blockxUv,blockyUv);
 		float4 avg = sampleBlock(float2(centrexUv,centreyUv));
 		
@@ -495,15 +499,15 @@ float4 mainImage(VertData v_in) : TARGET
 		}
 		
 	} else if (sharpen_stats && inBox2(uv,stat_box())) {        
-        float width = (stat_i_right_x - stat_i_left_x) / 256.0;
-        float height = (stat_i_bottom_y - stat_t_top_y) / 224.0;
+        float width = (stat_i_right_x - stat_i_left_x) / NES_WIDTH;
+        float height = (stat_i_bottom_y - stat_t_top_y) / NES_HEIGHT;
         if (width == 0 || height == 0) 
         {
             return image.Sample(textureSampler, v_in.uv);
         }
         
-        float xPerc = (uv.x - stat_i_left_x / 256.0) / width;
-        float yPerc = (uv.y - stat_t_top_y / 224.0) / height;
+        float xPerc = (uv.x - stat_i_left_x / NES_WIDTH) / width;
+        float yPerc = (uv.y - stat_t_top_y / NES_HEIGHT) / height;
         float4 raw_pix = stats_image.Sample(textureSampler, float2(xPerc,yPerc));
         if ((isBlack(raw_pix) || isWhite(raw_pix)) && raw_pix.a > 0.0)
         {
@@ -513,8 +517,8 @@ float4 mainImage(VertData v_in) : TARGET
 					
 			float2 local_uv = float2(block_uv.x, block_uv.y); //localspace
 			//convert to world space
-			float2 global_uv = float2(stat_i_left_x/256.0 + local_uv.x * width,
-									  stat_t_top_y/224.0 + local_uv.y * height);
+			float2 global_uv = float2(stat_i_left_x/NES_WIDTH + local_uv.x * width,
+									  stat_t_top_y/NES_HEIGHT + local_uv.y * height);
             float4 col = sampleBlock(global_uv);
 			int blockType = round(block_uv.z);			
 			
