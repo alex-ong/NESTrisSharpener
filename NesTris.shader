@@ -39,30 +39,9 @@ uniform float game_black_y2 = 24;
 uniform float game_grey_x1 = 36;
 uniform float game_grey_y1 = 214;
 
-bool sharpen_numbers;
-uniform texture2d numbers_image;
-uniform float lines_x1;
-uniform float lines_y1;
-uniform float lines_x2;
-uniform float lines_y2;
-
-uniform float top_x1;
-uniform float top_y1;
-uniform float top_x2;
-uniform float top_y2;
-
-uniform float level_x1;
-uniform float level_y1;
-uniform float level_x2;
-uniform float level_y2;
-
 uniform texture2d menu_overlay;
 uniform bool show_menu_overlay;
 
-#define NES_WIDTH 256.0
-#define NES_HEIGHT 224.0
-#define NES_PIXEL_WIDTH NES_PIXEL_WIDTH
-#define NES_PIXEL_HEIGHT NES_PIXEL_HEIGHT
 float distPoints(float2 a, float2 b)
 {
 	return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)*20.43;
@@ -140,11 +119,11 @@ bool blockStatIsCol2(int id)
 
 //width as portion of full screen width.
 float blockWidth() {
-	return (field_right_x - field_left_x) / 10.0 / NES_WIDTH;
+	return (field_right_x - field_left_x) / 10.0 / 256.0;
 }
 
 float blockHeight() {
-	return (field_bottom_y - field_top_y) / 20.0 / NES_HEIGHT;
+	return (field_bottom_y - field_top_y) / 20.0 / 224.0;
 }
 
 float pixelWidthUV()
@@ -165,10 +144,10 @@ float pixelUV()
 }
 
 bool inBox(float2 uv) {	
-	float startX = field_left_x / NES_WIDTH;
-	float endX = field_right_x / NES_WIDTH;
-	float startY = field_top_y / NES_HEIGHT;
-	float endY = field_bottom_y / NES_HEIGHT;
+	float startX = field_left_x / 256.0;
+	float endX = field_right_x / 256.0;
+	float startY = field_top_y / 224.0;
+	float endY = field_bottom_y / 224.0;
 	return (uv.x > startX && uv.x < endX && uv.y > startY && uv.y < endY);
 }
 
@@ -182,8 +161,8 @@ bool inBox2(float2 uv, float4 box)
 
 float4 pixBox(float2 uv, int pixels)
 {
-	return float4(uv.x - pixels / NES_WIDTH, uv.x + pixels/NES_WIDTH,
-				  uv.y - pixels / NES_HEIGHT, uv.y + pixels/NES_HEIGHT);
+	return float4(uv.x - (pixels / 256.0), uv.x + (pixels/256.0),
+				  uv.y - (pixels / 224.0), uv.y + (pixels/224.0));
 }
 
 float4 pixBoxStat(float2 uv, int pixels)
@@ -192,33 +171,28 @@ float4 pixBoxStat(float2 uv, int pixels)
 				  uv.y - pixels / 104.0, uv.y + pixels/104.0);
 }
 
-float2 paletteA1_uv(){ return float2(paletteA_x1 / NES_WIDTH, paletteA_y1 / NES_HEIGHT);}
-float2 paletteA2_uv(){ return float2(paletteA_x2 / NES_WIDTH, paletteA_y2 / NES_HEIGHT);}
-float2 paletteB1_uv(){ return float2(paletteB_x1 / NES_WIDTH, paletteB_y1 / NES_HEIGHT);}
-float2 paletteB2_uv(){ return float2(paletteB_x2 / NES_WIDTH, paletteB_y2 / NES_HEIGHT);}
+float2 paletteA1_uv(){ return float2(paletteA_x1 / 256.0, paletteA_y1 / 224.0);}
+float2 paletteA2_uv(){ return float2(paletteA_x2 / 256.0, paletteA_y2 / 224.0);}
+float2 paletteB1_uv(){ return float2(paletteB_x1 / 256.0, paletteB_y1 / 224.0);}
+float2 paletteB2_uv(){ return float2(paletteB_x2 / 256.0, paletteB_y2 / 224.0);}
 
 float4 paletteA1_box(){	return pixBox(paletteA1_uv(), 1);}
 float4 paletteA2_box(){	return pixBox(paletteA2_uv(), 1);}
 float4 paletteB1_box(){	return pixBox(paletteB1_uv(), 1);}
 float4 paletteB2_box(){	return pixBox(paletteB2_uv(), 1);}
 
-float2 gameBlack1_uv() { return float2(game_black_x1 / NES_WIDTH, game_black_y1 / NES_HEIGHT); }
-float2 gameBlack2_uv() { return float2(game_black_x2 / NES_WIDTH, game_black_y2 / NES_HEIGHT); }
-float2 gameGrey1_uv() { return float2(game_grey_x1 / NES_WIDTH, game_grey_y1 / NES_HEIGHT); }
+float2 gameBlack1_uv() { return float2(game_black_x1 / 256.0, game_black_y1 / 224.0); }
+float2 gameBlack2_uv() { return float2(game_black_x2 / 256.0, game_black_y2 / 224.0); }
+float2 gameGrey1_uv() { return float2(game_grey_x1 / 256.0, game_grey_y1 / 224.0); }
 
 float4 gameBlack1_box(){ return pixBox(gameBlack1_uv(), 2);}
 float4 gameBlack2_box(){ return pixBox(gameBlack2_uv(), 2);}
 float4 gameGrey1_box() { return pixBox(gameGrey1_uv(), 2);}
 
-float4 stat_box() { return float4(stat_i_left_x / NES_WIDTH,
-                                  stat_i_right_x / NES_WIDTH,
-                                  stat_t_top_y / NES_HEIGHT,
-                                  stat_i_bottom_y / NES_HEIGHT); }
-
-float4 lines_box() { return float4(lines_x1 / NES_WIDTH,
-                                  lines_x2 / NES_WIDTH,
-                                  lines_y1 / NES_HEIGHT,
-                                  lines_y2 / NES_HEIGHT); }
+float4 stat_box() { return float4(stat_i_left_x / 256.0,
+                                  stat_i_right_x / 256.0,
+                                  stat_t_top_y / 224.0,
+                                  stat_i_bottom_y / 224.0); }
 
 float4 blockTex(bool white, float2 uv, float4 base) {	
 	if (!white) {	
@@ -388,10 +362,10 @@ float4 setupDraw(float2 uv)
     if (sharpen_stats) {
         if (inBox2(uv, stat_box()))
         {
-			float width = (stat_i_right_x - stat_i_left_x) / NES_WIDTH;
-			float height = (stat_i_bottom_y - stat_t_top_y) / NES_HEIGHT;
-			float xPerc = (uv.x - stat_i_left_x / NES_WIDTH) / width;
-			float yPerc = (uv.y - stat_t_top_y / NES_HEIGHT) / height;
+			float width = (stat_i_right_x - stat_i_left_x) / 256.0;
+			float height = (stat_i_bottom_y - stat_t_top_y) / 224.0;
+			float xPerc = (uv.x - stat_i_left_x / 256.0) / width;
+			float yPerc = (uv.y - stat_t_top_y / 224.0) / height;
 			float3 a = closest_stat(float2(xPerc,yPerc));
 			if (inBox2(float2(xPerc,yPerc),pixBoxStat(float2(a.x,a.y),1))) {
 				return (float4(1.0,1.0,0.0,0.2) + orig);
@@ -411,17 +385,7 @@ float4 setupDraw(float2 uv)
 			return float4(0.0,0.0,1.0,1.0);
 		}
 	}
-	
-	if (sharpen_numbers)
-	{
-	
-		//if (inBox2(uv, lines_box()))
-		//{
-		//	return (float4(1.0,0.6,0.0,1.0) + orig) / 2.0;
-		//}
 		
-	}
-	
 	return image.Sample(textureSampler, uv);
 	
 }
@@ -519,15 +483,15 @@ float4 mainImage(VertData v_in) : TARGET
 		float bw = blockWidth();
 		float bh = blockHeight();
 		
-		float fblx = field_left_x/NES_WIDTH;
-		float fbty = field_top_y /NES_HEIGHT;
+		float fblx = field_left_x/256.0;
+		float fbty = field_top_y /224.0;
 		
 		float centrexUv = floor((uv.x - fblx) / bw) * bw + fblx + bw/2.0;		
 		float centreyUv = floor((uv.y - fbty) / bh) * bh + fbty + bh/2.0;
 		float2 centre = float2(centrexUv,centreyUv);
 		
-		float blockxUv = (((uv.x - fblx) * NES_WIDTH) % (bw * NES_WIDTH)) / (bw * NES_WIDTH);
-		float blockyUv = (((uv.y - fbty) * NES_HEIGHT) % (bh * NES_HEIGHT)) / (bh * NES_HEIGHT);
+		float blockxUv = (((uv.x - fblx) * 256.0) % (bw * 256.0)) / (bw * 256.0);
+		float blockyUv = (((uv.y - fbty) * 224.0) % (bh * 224.0)) / (bh * 224.0);
 		float2 blockUv = float2(blockxUv,blockyUv);
 		float4 avg = sampleBlock(float2(centrexUv,centreyUv), pixelSize);
 		
@@ -561,16 +525,16 @@ float4 mainImage(VertData v_in) : TARGET
 		}
 		
 	} else if (sharpen_stats && inBox2(uv,stat_box())) {        
-        float width = (stat_i_right_x - stat_i_left_x) / NES_WIDTH;
-        float height = (stat_i_bottom_y - stat_t_top_y) / NES_HEIGHT;		
+        float width = (stat_i_right_x - stat_i_left_x) / 256.0;
+        float height = (stat_i_bottom_y - stat_t_top_y) / 224.0;		
 		
         if (width == 0 || height == 0) 
         {
             return image.Sample(textureSampler, v_in.uv);
         }
         
-        float xPerc = (uv.x - stat_i_left_x / NES_WIDTH) / width;
-        float yPerc = (uv.y - stat_t_top_y / NES_HEIGHT) / height;
+        float xPerc = (uv.x - stat_i_left_x / 256.0) / width;
+        float yPerc = (uv.y - stat_t_top_y / 224.0) / height;
         float4 raw_pix = stats_image.Sample(textureSampler, float2(xPerc,yPerc));
         if ((isBlack(raw_pix) || isWhite(raw_pix)) && raw_pix.a > 0.0)
         {
@@ -580,8 +544,8 @@ float4 mainImage(VertData v_in) : TARGET
 					
 			float2 local_uv = float2(block_uv.x, block_uv.y); //localspace
 			//convert to world space
-			float2 global_uv = float2(stat_i_left_x/NES_WIDTH + local_uv.x * width,
-									  stat_t_top_y/NES_HEIGHT + local_uv.y * height);
+			float2 global_uv = float2(stat_i_left_x/256.0 + local_uv.x * width,
+									  stat_t_top_y/224.0 + local_uv.y * height);
             float4 col = sampleBlock(global_uv, pixelSize);
 			int blockType = round(block_uv.z);			
 			
