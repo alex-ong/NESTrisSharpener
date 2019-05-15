@@ -218,13 +218,16 @@ bool isGrey(float4 rgba) {
 	
 }
 
-float4 palette1() {
-	return (sampleBlock(paletteA1_uv()) +
-			sampleBlock(paletteA2_uv())) / 2.0;  //S Piece
+float4 palette1(float2 pixelSize) 
+{
+	return (sampleBlock(paletteA1_uv(), pixelSize) +
+			sampleBlock(paletteA2_uv(), pixelSize)) / 2.0;  //S Piece
 }
-float4 palette2() {
-	return (sampleBlock(paletteB1_uv()) +
-	        sampleBlock(paletteB2_uv())) / 2.0; // L piece
+
+float4 palette2(float2 pixelSize) 
+{
+	return (sampleBlock(paletteB1_uv(), pixelSize) +
+	        sampleBlock(paletteB2_uv(), pixelSize)) / 2.0; // L piece
 }
 
 float4 matchPalette(float4 p1, float4 p2, float4 col)
@@ -239,14 +242,14 @@ float4 matchPalette(float4 p1, float4 p2, float4 col)
 }
 
 //Simple 4 sample of centre of 3x3 block
-float4 sampleBlock(float2 uv)
+float4 sampleBlock(float2 uv, float2 pixelSize)
 {	
 	float4 centre = image.Sample(textureSampler, uv);
-	//float4 tl = image.Sample(textureSampler,float2(uv.x - NES_PIXEL_WIDTH, uv.y - NES_PIXEL_HEIGHT));
-	float4 tr = image.Sample(textureSampler,float2(uv.x + NES_PIXEL_WIDTH, uv.y - NES_PIXEL_HEIGHT));
-	float4 r = image.Sample(textureSampler,float2(uv.x + NES_PIXEL_WIDTH, uv.y));
-	float4 bl = image.Sample(textureSampler,float2(uv.x - NES_PIXEL_WIDTH, uv.y + NES_PIXEL_HEIGHT));
-	float4 br = image.Sample(textureSampler,float2(uv.x + NES_PIXEL_WIDTH, uv.y + NES_PIXEL_HEIGHT));
+	//float4 tl = image.Sample(textureSampler,float2(uv.x - pixelSize.x, uv.y - pixelSize.y));
+	float4 tr = image.Sample(textureSampler,float2(uv.x + pixelSize.x, uv.y - pixelSize.y));
+	float4 r = image.Sample(textureSampler,float2(uv.x + pixelSize.x, uv.y));
+	float4 bl = image.Sample(textureSampler,float2(uv.x - pixelSize.x, uv.y + pixelSize.y));
+	float4 br = image.Sample(textureSampler,float2(uv.x + pixelSize.x, uv.y + pixelSize.y));
 	float4 avg = (tr + bl + br + centre + r) / 5.0;
 	//avg = centre;
 	return avg;
@@ -254,42 +257,42 @@ float4 sampleBlock(float2 uv)
 
 
 //Simple top/bottom edge sample of 8x8 block.
-float4 sampleEdge(float2 uv)
+float4 sampleEdge(float2 uv, float2 pixelSize)
 {
-	float topyUv = uv.y + 2.5/NES_HEIGHT;
-	float bottomyUv = uv.y - 3.5/NES_HEIGHT;
+	float topyUv = uv.y + 2.5 * pixelSize.y;
+	float bottomyUv = uv.y - 3.5 * pixelSize.y;
 	float4 top = image.Sample(textureSampler, float2(uv.x, topyUv));
 	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));			
 	return (top + bottom) / 2.0;
 }
 
-float4 sampleEdgeStat(float2 uv)
+float4 sampleEdgeStat(float2 uv, float2 pixelSize)
 {
-	float topyUv = uv.y + 1.5/NES_HEIGHT;
-	float bottomyUv = uv.y - 2.5/NES_HEIGHT;
+	float topyUv = uv.y + 1.5 * pixelSize.y;
+	float bottomyUv = uv.y - 2.5 * pixelSize.y;
 	float4 top = image.Sample(textureSampler, float2(uv.x, topyUv));
 	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));			
 	return (top + bottom) / 2.0;
 }
 
-bool isInGame()
-{
-	float4 black1 = sampleBlock(gameBlack1_uv()); //black box next to "LINES";
-	float4 black2 = sampleBlock(gameBlack2_uv()); //black box of "TOP/SCORE"
-	float4 grey1 = sampleBlock(gameGrey1_uv()); //grey box of bottom middle left
+bool isInGame(float2 pixelSize)
+{	
+	float4 black1 = sampleBlock(gameBlack1_uv(), pixelSize); //black box next to "LINES";
+	float4 black2 = sampleBlock(gameBlack2_uv(), pixelSize); //black box of "TOP/SCORE"
+	float4 grey1 = sampleBlock(gameGrey1_uv(), pixelSize); //grey box of bottom middle left
 	return (isBlack(black1) && isBlack(black2) && (isGrey(grey1) || isWhite(grey1)));
 }
 
 //if top edge is not black, we assume game over.
 
-bool isGameOver()
+bool isGameOver(float2 pixelSize)
 {	
 	float startX = 12/32.0;
 	float startY = 5/28.0 + 1/56.0;	
 		
-	float4 topleft = sampleBlock(float2(startX + 1/64.0, startY + 1/56.0));
-	float4 topmid = sampleBlock(float2(startX + 11/64.0, startY + 1/56.0));
-	float4 topright = sampleBlock(float2(startX + 19/64.0, startY + 1/56.0));
+	float4 topleft = sampleBlock(float2(startX + 1/64.0, startY + 1/56.0), pixelSize);
+	float4 topmid = sampleBlock(float2(startX + 11/64.0, startY + 1/56.0), pixelSize);
+	float4 topright = sampleBlock(float2(startX + 19/64.0, startY + 1/56.0), pixelSize);
 	
 	if (isBlack(topleft) || isBlack(topmid) || isBlack(topright)) {
 		return false;
@@ -397,13 +400,13 @@ float4 calculateColorFixed(float4 original)
 
 //first figures out what level we are on. Then picks out of the current
 //level's colours
-float4 calculateColorFixedStat(float4 original)
-{
+float4 calculateColorFixedStat(float4 original, float2 pixelSize)
+{	
 	//first, calculate which level we are...
 	float4 primary = float4(1.0,0.0,1.0,1.0);
 	float4 secondary = float4(1.0,0.0,1.0,1.0);
-	float4 p1 = palette1();
-	float4 p2 = palette2();
+	float4 p1 = palette1(pixelSize);
+	float4 p2 = palette2(pixelSize);
 	float minDist = 1000000; //1+1+1 = 3 :D
 	for (int i = 0; i < 10; i++)
 	{		
@@ -421,6 +424,7 @@ float4 calculateColorFixedStat(float4 original)
 	
 	return matchPalette(primary,secondary,original);
 }
+
 float4 do_show_menu_overlay(float2 uv)
 {
 	float4 mask_pix = menu_overlay.Sample(textureSampler,uv);
@@ -430,16 +434,37 @@ float4 do_show_menu_overlay(float2 uv)
 		return mask_pix;
 	}
 }
+
+float pixelWidthUV()
+{
+	float bw = blockWidth();
+	return bw/8.0;
+}
+
+float pixelHeightUV()
+{
+	float bh = blockHeight();
+	return bh/8.0;
+}
+
+float pixelUV()
+{
+	return float2(pixelWidthUV(),pixelHeightUV());
+}
+
+
 float4 mainImage(VertData v_in) : TARGET
 {	
 	float2 uv = v_in.uv;
+	float2 pixelSize = pixelUV();
+	
 	if (setup_mode) {
 		return setupDraw(uv);
 	} 
 	
 	if (!skip_detect_game) 
 	{	
-		if (!isInGame()) {
+		if (!isInGame(pixelSize)) {
 			if (show_menu_overlay) { 
 				return do_show_menu_overlay(uv);
 			}
@@ -449,14 +474,17 @@ float4 mainImage(VertData v_in) : TARGET
 	
 	if (!skip_detect_game_over) 
 	{		
-		if (isGameOver()) {
+		if (isGameOver(pixelSize)) {
 			return image.Sample(textureSampler,uv);
 		}
 	}
 	
+	
+	
 	if (inBox(uv)) { //in play area		
 		float bw = blockWidth();
 		float bh = blockHeight();
+		
 		float fblx = field_left_x/NES_WIDTH;
 		float fbty = field_top_y /NES_HEIGHT;
 		
@@ -467,32 +495,32 @@ float4 mainImage(VertData v_in) : TARGET
 		float blockxUv = (((uv.x - fblx) * NES_WIDTH) % (bw * NES_WIDTH)) / (bw * NES_WIDTH);
 		float blockyUv = (((uv.y - fbty) * NES_HEIGHT) % (bh * NES_HEIGHT)) / (bh * NES_HEIGHT);
 		float2 blockUv = float2(blockxUv,blockyUv);
-		float4 avg = sampleBlock(float2(centrexUv,centreyUv));
+		float4 avg = sampleBlock(float2(centrexUv,centreyUv), pixelSize);
 		
 		//now we have two scenarios - centre is white, or not
 		if (isBlack(avg)) {
 			return float4(0.0,0.0,0.0,1.0);
 		} else if (isWhite(avg)) {
 			if (stat_palette_white) {
-				avg = palette1();				
+				avg = palette1(pixelSize);				
 			} else {
-				avg = sampleEdge(float2(centrexUv,centreyUv));
+				avg = sampleEdge(float2(centrexUv,centreyUv), pixelSize);
 			}
 						
 			if (fixed_palette) 
 			{
-				avg = calculateColorFixedStat(avg);
+				avg = calculateColorFixedStat(avg, pixelSize);
 			}
 						
 			return blockTex(true, blockUv, avg);
 		} else {							
 			if (stat_palette) {
-				avg = matchPalette(palette1(),palette2(),avg);
+				avg = matchPalette(palette1(pixelSize),palette2(pixelSize),avg);
 			}
 			
 			if (fixed_palette) 
 			{
-				avg = calculateColorFixedStat(avg);
+				avg = calculateColorFixedStat(avg, pixelSize);
 			}
 			
 			return blockTex(false, blockUv, avg);
@@ -500,7 +528,8 @@ float4 mainImage(VertData v_in) : TARGET
 		
 	} else if (sharpen_stats && inBox2(uv,stat_box())) {        
         float width = (stat_i_right_x - stat_i_left_x) / NES_WIDTH;
-        float height = (stat_i_bottom_y - stat_t_top_y) / NES_HEIGHT;
+        float height = (stat_i_bottom_y - stat_t_top_y) / NES_HEIGHT;		
+		
         if (width == 0 || height == 0) 
         {
             return image.Sample(textureSampler, v_in.uv);
@@ -519,30 +548,30 @@ float4 mainImage(VertData v_in) : TARGET
 			//convert to world space
 			float2 global_uv = float2(stat_i_left_x/NES_WIDTH + local_uv.x * width,
 									  stat_t_top_y/NES_HEIGHT + local_uv.y * height);
-            float4 col = sampleBlock(global_uv);
+            float4 col = sampleBlock(global_uv, pixelSize);
 			int blockType = round(block_uv.z);			
 			
 			if (blockStatIsWhite(blockType)) 
 			{
 				if (stat_palette_white) {
-					col = palette1();					
+					col = palette1(pixelSize);					
 				} else {
-					col = sampleEdgeStat(global_uv);
+					col = sampleEdgeStat(global_uv, pixelSize);
 				}
 			}
 			
 			
             if (stat_palette) {
-                col = matchPalette(palette1(), palette2(), col);
+                col = matchPalette(palette1(pixelSize), palette2(pixelSize), col);
             }
             
             if (fixed_palette)
             {
                 if (blockStatIsWhite(blockType) || blockStatIsCol1(blockType))
 				{
-					return calculateColorFixedStat(palette1());
+					return calculateColorFixedStat(palette1(pixelSize),pixelSize);
 				} else {
-					return calculateColorFixedStat(palette2());
+					return calculateColorFixedStat(palette2(pixelSize),pixelSize);
 				}
             }
 			
