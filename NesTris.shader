@@ -39,6 +39,23 @@ uniform float game_black_y2 = 24;
 uniform float game_grey_x1 = 36;
 uniform float game_grey_y1 = 214;
 
+bool sharpen_numbers;
+uniform texture2d numbers_image;
+uniform float lines_x1;
+uniform float lines_y1;
+uniform float lines_x2;
+uniform float lines_y2;
+
+uniform float top_x1;
+uniform float top_y1;
+uniform float top_x2;
+uniform float top_y2;
+
+uniform float level_x1;
+uniform float level_y1;
+uniform float level_x2;
+uniform float level_y2;
+
 uniform texture2d menu_overlay;
 uniform bool show_menu_overlay;
 
@@ -121,6 +138,32 @@ bool blockStatIsCol2(int id)
     return id > 4;
 }
 
+//width as portion of full screen width.
+float blockWidth() {
+	return (field_right_x - field_left_x) / 10.0 / NES_WIDTH;
+}
+
+float blockHeight() {
+	return (field_bottom_y - field_top_y) / 20.0 / NES_HEIGHT;
+}
+
+float pixelWidthUV()
+{
+	float bw = blockWidth();
+	return bw/8.0;
+}
+
+float pixelHeightUV()
+{
+	float bh = blockHeight();
+	return bh/8.0;
+}
+
+float pixelUV()
+{
+	return float2(pixelWidthUV(),pixelHeightUV());
+}
+
 bool inBox(float2 uv) {	
 	float startX = field_left_x / NES_WIDTH;
 	float endX = field_right_x / NES_WIDTH;
@@ -171,16 +214,11 @@ float4 stat_box() { return float4(stat_i_left_x / NES_WIDTH,
                                   stat_i_right_x / NES_WIDTH,
                                   stat_t_top_y / NES_HEIGHT,
                                   stat_i_bottom_y / NES_HEIGHT); }
-                                  
-//width as portion of full screen width.
-float blockWidth() {
-	return (field_right_x - field_left_x) / 10.0 / NES_WIDTH;
-}
 
-float blockHeight() {
-	return (field_bottom_y - field_top_y) / 20.0 / NES_HEIGHT;
-}
-
+float4 lines_box() { return float4(lines_x1 / NES_WIDTH,
+                                  lines_x2 / NES_WIDTH,
+                                  lines_y1 / NES_HEIGHT,
+                                  lines_y2 / NES_HEIGHT); }
 
 float4 blockTex(bool white, float2 uv, float4 base) {	
 	if (!white) {	
@@ -320,6 +358,8 @@ float colorDist(float4 e1, float4 e2)
 
 float4 setupDraw(float2 uv)
 {
+	float2 pixelSize = pixelUV();
+	
 	float4 orig = image.Sample(textureSampler, uv);
 	if (inBox(uv))
 	{		
@@ -372,9 +412,20 @@ float4 setupDraw(float2 uv)
 		}
 	}
 	
+	if (sharpen_numbers)
+	{
+	
+		//if (inBox2(uv, lines_box()))
+		//{
+		//	return (float4(1.0,0.6,0.0,1.0) + orig) / 2.0;
+		//}
+		
+	}
+	
 	return image.Sample(textureSampler, uv);
 	
 }
+
 
 //matches to closest colour out of entire palette
 float4 calculateColorFixed(float4 original)
@@ -433,23 +484,6 @@ float4 do_show_menu_overlay(float2 uv)
 	} else {
 		return mask_pix;
 	}
-}
-
-float pixelWidthUV()
-{
-	float bw = blockWidth();
-	return bw/8.0;
-}
-
-float pixelHeightUV()
-{
-	float bh = blockHeight();
-	return bh/8.0;
-}
-
-float pixelUV()
-{
-	return float2(pixelWidthUV(),pixelHeightUV());
 }
 
 
