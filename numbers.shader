@@ -1,4 +1,3 @@
-//#include "shared.shader"
 uniform texture2d block_image;
 
 uniform bool setup_mode = true;
@@ -11,6 +10,7 @@ uniform float lines_y2 = 28;
 
 float4 line_box() { return float4(lines_x1 / 256.0, lines_x2 / 256.0, 
                                   lines_y1 / 224.0, lines_y2 / 224.0);}
+                                  
 bool inBox2(float2 uv, float4 box)
 {
 	return (uv.x >= box.r && 
@@ -54,7 +54,28 @@ float myDiff(float4 a, float4 b)
     return (a.r - b.r) * (a.r - b.r);
 }
 
+float score_pixel (float4 raw_box, int row, int col, float2 start_raw, float2 start_ref, float2 raw_pix_size, float2 ref_pix_size)
+{
+    float4 raw_colour = image.Sample(textureSampler, float2(start_raw.x + col*raw_pix_size.x,
+                                                            start_raw.y + row*raw_pix_size.y));           
+    float4 ref_colour = block_image.Sample(textureSampler, float2(start_ref.x + col*ref_pix_size.x,
+                                                                  start_ref.y + row*ref_pix_size.y));
+    return myDiff(raw_colour, ref_colour);                                                                
+}
 
+float score_row (float4 raw_box, int row, float2 start_raw, float2 start_ref, float2 raw_pix_size, float2 ref_pix_size)
+{
+    float result = 0;
+    result += score_pixel(raw_box, row, 0,start_raw,start_ref,raw_pix_size,ref_pix_size);        
+    result += score_pixel(raw_box, row, 1,start_raw,start_ref,raw_pix_size,ref_pix_size);        
+    result += score_pixel(raw_box, row, 2,start_raw,start_ref,raw_pix_size,ref_pix_size);        
+    result += score_pixel(raw_box, row, 3,start_raw,start_ref,raw_pix_size,ref_pix_size);        
+    result += score_pixel(raw_box, row, 4,start_raw,start_ref,raw_pix_size,ref_pix_size);        
+    result += score_pixel(raw_box, row, 5,start_raw,start_ref,raw_pix_size,ref_pix_size);        
+    result += score_pixel(raw_box, row, 6,start_raw,start_ref,raw_pix_size,ref_pix_size);  
+    return result;
+}
+//this shit is unrolled. sorry yallah.
 float score_number(float4 raw_box, int i)
 {
     float result = 0.0;
@@ -69,25 +90,26 @@ float score_number(float4 raw_box, int i)
     float ref_pix_height = 1.0 / num_pix;
     float ref_pix_width2 = ref_pix_width/2.0;
     float ref_pix_height2 = ref_pix_height/2.0;
+     
+    float start_raw_x = raw_box.r + raw_pix_width2;
+    float start_raw_y = raw_box.b + raw_pix_height2;    
+    float start_ref_x = ref_box_width*i + ref_pix_width2;
+    float start_ref_y = ref_pix_width2;
     
-    [unroll(7)]
-    for (int row = 0; row < num_pix; row++)
-    {    
-        [unroll(7)]
-        for (int col = 0; col < num_pix; col++)
-        {            
-            float4 raw_colour = image.Sample(textureSampler, float2(raw_box.r + raw_pix_width2 + col*raw_pix_width,
-                                                                    raw_box.b + raw_pix_height2 + row*raw_pix_height));
-            
-
-            float4 ref_colour = block_image.Sample(textureSampler, float2(ref_box_width*i + ref_pix_width2 + ref_pix_width*col,
-                                                                               ref_pix_width2 + ref_pix_height*row));
-            result += myDiff(raw_colour, ref_colour);                                                                    
-
-            
-        }
-    }
+    float2 start_raw = float2(start_raw_x,start_raw_y);
+    float2 start_ref = float2(start_ref_x,start_ref_y);
+    float2 raw_pix_size = float2(raw_pix_width,raw_pix_height);
+    float2 ref_pix_size = float2(ref_pix_width,ref_pix_height);
     
+    result += score_row(raw_box,0,start_raw,start_ref,raw_pix_size,ref_pix_size);
+    result += score_row(raw_box,1,start_raw,start_ref,raw_pix_size,ref_pix_size);
+    result += score_row(raw_box,2,start_raw,start_ref,raw_pix_size,ref_pix_size);
+    result += score_row(raw_box,3,start_raw,start_ref,raw_pix_size,ref_pix_size);
+    result += score_row(raw_box,4,start_raw,start_ref,raw_pix_size,ref_pix_size);
+    result += score_row(raw_box,5,start_raw,start_ref,raw_pix_size,ref_pix_size);
+    result += score_row(raw_box,6,start_raw,start_ref,raw_pix_size,ref_pix_size);
+    
+        
     return result;
     
 }
@@ -99,99 +121,112 @@ int score_all(float4 raw_box)
     int min_score = 1000000;
     
     float score;
-    score = score_number(raw_box, 0);
-    if (score < min_score) {
-        result = 0;
-        min_score = score;
-    }
+    score = score_number(raw_box, 0);    
+    min_score = score;
+    
+    
     score = score_number(raw_box, 1);
-    if (score < min_score) {
+    if (score < min_score)
+    {
         result = 1;
         min_score = score;
     }
+    
     score = score_number(raw_box, 2);
-    if (score < min_score) {
+    if (score < min_score)
+    {
         result = 2;
         min_score = score;
     }
     score = score_number(raw_box, 3);
-    if (score < min_score) {
+    if (score < min_score)
+    {
         result = 3;
         min_score = score;
     }
     score = score_number(raw_box, 4);
-    if (score < min_score) {
+    if (score < min_score)
+    {
         result = 4;
         min_score = score;
     }
     score = score_number(raw_box, 5);
-    if (score < min_score) {
+    if (score < min_score)
+    {
         result = 5;
         min_score = score;
     }
     score = score_number(raw_box, 6);
-    if (score < min_score) {
+    if (score < min_score)
+    {
         result = 6;
         min_score = score;
     }
     score = score_number(raw_box, 7);
-    if (score < min_score) {
+    if (score < min_score)
+    {
         result = 7;
         min_score = score;
     }
     score = score_number(raw_box, 8);
-    if (score < min_score) {
+    if (score < min_score)
+    {
         result = 8;
         min_score = score;
     }
     score = score_number(raw_box, 9);
+    if (score < min_score)
+    {
+        result = 9;
+        min_score = score;
+    }
+    /*
     if (score < min_score) {
         result = 9;
         min_score = score;
     }
-   
+    */ 
     return result;
 }
 
 
-float4 intToColour(int result)
+bool draw_setup_split(float2 uv, int i)
 {
-    if (result == 0)
-        return float4(0.0,0.0,1.0,1.0);
-    else if (result == 1)
-        return float4(0.0,1.0,0.0,1.0);
-    else if (result == 2)
-        return float4(0.0,1.0,1.0,1.0);
-    else if (result == 3)
-        return float4(1.0,0.0,0.0,1.0);
-    else if (result == 4)
-        return float4(1.0,0.0,1.0,1.0);
-    else if (result == 5)
-        return float4(1.0,1.0,0.0,1.0);
-    else if (result == 6)
-        return float4(1.0,1.0,1.0,1.0);
-    else if (result == 7)
-        return float4(1.0,0.5,1.0,1.0);
-    else if (result == 8)
-        return float4(1.0,1.0,0.5,1.0);
-    else// (result == 9)
-        return float4(0.5,1.0,1.0,1.0);
-} 
-
+    float4 box = split_box(line_box(),3,i);
+    return inBox2(uv, box);
+}
 float4 draw_setup(float2 uv)
 {    
     float4 orig = image.Sample(textureSampler, uv);
-    [unroll(6)]
-    for (int i = 0; i < 6; i++) {
-        float4 box = split_box(line_box(),6,i);
-        if (inBox2(uv, box)) {
-            int result = 6;                           
-            return (intToColour(result) + orig) / 2.0;
-        }
+    
+    if (draw_setup_split(uv, 0)) {
+        return (orig + float4(1,1,1,1)) / 2.0;
+    }
+    
+    if (draw_setup_split(uv, 1)) {
+        return (orig + float4(1,1,1,1)) / 2.0;
+    }
+    if (draw_setup_split(uv, 2)) {
+        return (orig + float4(1,1,1,1)) / 2.0;
     }
     
     
-    return image.Sample(textureSampler, uv);
+    return orig;
+}
+
+//returns [R,g,b, (success)]
+float4 draw_main_split(float2 uv, int i)
+{
+    float4 box = split_box(line_box(),3, i);
+    if (inBox2(uv, box))
+    {
+        int result = score_all(box);            
+        float2 pos = inbox_inverseLerp(uv,box);
+        float4 targetBox = float4(result/10.0,(result+1)/10.0,0.0,1.0);
+        float2 target = inbox_lerp(pos,targetBox);
+        return block_image.Sample(textureSampler, target); 
+    }
+    return float4(0,0,0,0);
 }
 
 float4 mainImage(VertData v_in) : TARGET
@@ -201,21 +236,15 @@ float4 mainImage(VertData v_in) : TARGET
         return draw_setup(uv);
     }
     
-    if (inBox2(uv, line_box())) {
-        
-        [unroll(6)]
-        for (int i = 0; i < 6; i++)
-        {
-            float4 box = split_box(line_box(), 6, i);
-            
-            if (inBox2(uv, box)) {
-                int result = score_all(box);            
-                float2 pos = inbox_inverseLerp(uv,box);
-                float4 targetBox = float4(result/10.0,(result+1)/10.0,0.0,1.0);
-                float2 target = inbox_lerp(pos,targetBox);
-                return block_image.Sample(textureSampler, target);            
-            }
-        }
+    if (inBox2(uv, line_box())) {        
+        float4 color;
+        //unrolled.
+        color = draw_main_split(uv,0);
+        if (color.a != 0.0) return color;
+        color = draw_main_split(uv,1);
+        if (color.a != 0.0) return color;
+        color = draw_main_split(uv,2);
+        if (color.a != 0.0) return color;
         
         return float4(0.0,0.0,0.0,1.0);
     }
