@@ -17,6 +17,23 @@ bool inBox2(float2 uv, float4 box)
 			uv.y >= box.b && 
 			uv.y <= box.a);
 }
+float inverseLerp(float start, float end, float val)
+{
+    return (val - start) / (end - start);
+}
+
+float2 inbox_inverseLerp(float2 uv, float4 box)
+{
+    return float2(inverseLerp(box.r,box.g, uv.x),
+                  inverseLerp(box.b,box.a, uv.y));
+}
+
+
+float2 inbox_lerp(float2 perc, float4 box)
+{
+    return float2 (lerp(box.r,box.g,perc.x),
+                   lerp(box.b,box.a,perc.y));
+}
 
 float4 split_box(float4 box, int size, int index)
 {
@@ -112,26 +129,42 @@ float4 intToColour(int result)
 }
 
 float4 draw_setup(float2 uv)
-{
+{    
     float4 orig = image.Sample(textureSampler, uv);
      
     for (int i = 0; i < 3; i++) {
         float4 box = split_box(line_box(),3,i);
         if (inBox2(uv, box)) {
-            int result = score_all(box);   
-            float4 col = (intToColour(result) + orig) / 2.0;
-            return col;            
+            int result = score_all(box);                           
+            return (intToColour(result) + orig) / 2.0;
         }
     }
-        
+       
     
     return image.Sample(textureSampler, uv);
 }
 
 float4 mainImage(VertData v_in) : TARGET
 {
+    float2 uv = v_in.uv;
     if (setup_mode) {
-        return draw_setup(v_in.uv);
+        return draw_setup(uv);
     }
-	return image.Sample(textureSampler, v_in.uv);
+    
+    if (inBox2(uv, line_box())) {
+        for (int i = 0; i < 3; i++)
+        {
+            float4 box = split_box(line_box(), 3, i);
+            
+            if (inBox2(uv, box)) {
+                int result = score_all(box);            
+                float2 pos = inbox_inverseLerp(uv,box);
+                float4 targetBox = float4(result/10.0,(result+1)/10.0,0.0,1.0);
+                float2 target = inbox_lerp(pos,targetBox);
+                return block_image.Sample(textureSampler, target);            
+            }
+        }
+        return float4(0.0,0.0,0.0,1.0);
+    }
+	return image.Sample(textureSampler, uv);
 }
