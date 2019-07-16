@@ -81,14 +81,29 @@ This section enables the sharpening of your statistics window
 
 | Name           | default value   |
 | -------------- | -------------   |
-| sharpen_stats  | true (ticked)   |
+| sharpen_stats  | false (unticked)   |
 | stats_image    | blocks-stat.png |
 | stat_t_top_y   | 87              |
 | stat_i_left_x  | 24              |
 | stat_i_right_x | 47              |
 | stat_t_bottom_y| 185             |
 
+
 The algorithm for sharpening stats is the same as for your field. This means for best results, use and calibrate fixed_palette.
+
+# sharpen_preview
+This section enables the sharpening of your preview window
+
+| Name                 | default value   |
+| --------------       | -------------   |
+| sharpen_preview      | true (ticked)   |
+| preview_left_x       | 192             |
+| preview_right_x      | 223             |
+| preview_top_y        | 112             |
+| preview_bottom_y     | 128             |
+
+
+The algorithm for sharpening preview is the same as for your field. This means for best results, use and calibrate fixed_palette.
 
 # game / menu detection
 skip_detect_game - if you tick this, we will always be in game mode. if it is un-ticked, we check for menus.

@@ -28,6 +28,11 @@ uniform float stat_i_left_x = 24;
 uniform float stat_i_right_x = 47;
 uniform float stat_i_bottom_y = 185;
 
+uniform bool sharpen_preview = true;
+uniform float preview_left_x = 192;
+uniform float preview_right_x = 223;
+uniform float preview_top_y = 112;
+uniform float preview_bottom_y = 128;
 
 uniform bool skip_detect_game;
 uniform bool skip_detect_game_over;
@@ -41,6 +46,11 @@ uniform float game_grey_y1 = 214;
 
 uniform texture2d menu_overlay;
 uniform bool show_menu_overlay;
+
+float myLerp(float start, float end, float perc)
+{
+    return start + (end-start) * perc;
+}
 
 float distPoints(float2 a, float2 b)
 {
@@ -193,6 +203,17 @@ float4 stat_box() { return float4(stat_i_left_x / 256.0,
                                   stat_i_right_x / 256.0,
                                   stat_t_top_y / 224.0,
                                   stat_i_bottom_y / 224.0); }
+float4 preview_box() { return float4(preview_left_x / 256.0,
+                                     preview_right_x / 256.0,
+                                     preview_top_y / 224.0,
+                                     preview_bottom_y / 224.0); }
+    
+float2 prev_offset1() { return float2(myLerp(preview_left_x,preview_right_x, 0.30) / 256.0,
+                                      myLerp(preview_top_y,preview_bottom_y, 0.875) / 224.0); }
+float2 prev_offset2() { return float2(myLerp(preview_left_x,preview_right_x, 0.4375) / 256.0,
+                                      myLerp(preview_top_y,preview_bottom_y, 0.875) / 224.0); }
+float2 prev_offset3() { return float2(myLerp(preview_left_x,preview_right_x, 0.6875) / 256.0,
+                                      myLerp(preview_top_y,preview_bottom_y, 0.875) / 224.0); }                                      
 
 float4 blockTex(bool white, float2 uv, float4 base) {	
 	if (!white) {	
@@ -375,6 +396,22 @@ float4 setupDraw(float2 uv)
         }
     }
 	
+    if (sharpen_preview)
+    {
+        if (inBox2(uv, preview_box()))
+        {
+            if (inBox2(uv, pixBox(prev_offset1(),1))) {
+                return float4(1.0,0.8,0.0,1.0);
+            } else if (inBox2(uv, pixBox(prev_offset2(),1))) {
+                return float4(1.0,0.0,0.0,1.0);
+            } else if (inBox2(uv, pixBox(prev_offset3(),1))) {
+                return float4(1.0,0.0,1.0,1.0);
+            } else {            
+                return (float4(0.3,1.0,0.3,1.0) + orig) / 2.0;
+            }
+        }
+    }
+    
 	if (!skip_detect_game) 
 	{
 		if (inBox2(uv, gameBlack1_box())) {
@@ -451,6 +488,108 @@ float4 do_show_menu_overlay(float2 uv)
 }
 
 
+int whichPiece(bool o, bool r, bool p)
+{
+    //0123456
+    //TJZOSLI
+    if (o) 
+    {
+        if (r) {
+            if (p) {
+                return 3; //O
+            }
+            return 4; //S
+        }
+        return 5; //L
+    } else if (r) {        
+        if (p) {
+            return 2; //z
+        }
+        return 0; //t        
+    } else if (p) {
+        return 1; //j
+    } else {
+        return 6; //i
+    }
+}
+
+float4 do_sharpen_preview(float2 uv)
+{
+    bool o = !isBlack(image.Sample(textureSampler, prev_offset1()));
+    bool r = !isBlack(image.Sample(textureSampler, prev_offset2()));
+    bool p = !isBlack(image.Sample(textureSampler, prev_offset3()));
+    
+    //figure out which result.
+    int result = whichPiece(o,r,p);
+    //TJZOSLI = 0->6;
+    float bw = blockWidth();
+    float bh = blockHeight();
+    float fblx = preview_left_x/256.0;
+    float fbty = preview_top_y /224.0;
+    
+    //every piece but o and i are offset on x.
+    if (result != 3 && result != 6) { 
+        fblx += bw / 2.0;
+        float limit = (preview_right_x / 256.0) - (bw / 2.0);
+        if (uv.x > limit) 
+        {
+            return float4(0.0,0.0,0.0,1.0);
+        }
+    }
+    
+    if (result == 6) //i piece offset on y.
+    {
+        fbty += blockHeight() / 2.0;
+    }
+       
+    float centrexUv = floor((uv.x - fblx) / bw) * bw + fblx + bw/2.0;		
+    float centreyUv = floor((uv.y - fbty) / bh) * bh + fbty + bh/2.0;
+    float2 centre = float2(centrexUv,centreyUv);
+    
+    return drawBlock(uv, centre, fblx, fbty);
+}
+
+float4 drawBlock(float2 uv, float2 centre, float gridCornerX, float gridCornerY)
+{
+    float bw = blockWidth();
+    float bh = blockHeight();
+    
+    float blockxUv = (((uv.x - gridCornerX) * 256.0) % (bw * 256.0)) / (bw * 256.0);
+    float blockyUv = (((uv.y - gridCornerY) * 224.0) % (bh * 224.0)) / (bh * 224.0);
+    float2 pixelSize = pixelUV();
+    float2 blockUv = float2(blockxUv,blockyUv);
+    float4 avg = sampleBlock(centre, pixelSize);
+    
+    //now we have two scenarios - centre is white, or not
+    if (isBlack(avg)) {
+        return float4(0.0,0.0,0.0,1.0);
+    } else if (isWhite(avg)) {
+        if (stat_palette_white) {
+            avg = palette1(pixelSize);				
+        } else {
+            avg = sampleEdge(centre, pixelSize);
+        }
+                    
+        if (fixed_palette) 
+        {
+            avg = calculateColorFixedStat(avg, pixelSize);
+        }
+                    
+        return blockTex(true, blockUv, avg);
+    } else {							
+        if (stat_palette) {
+            avg = matchPalette(palette1(pixelSize),palette2(pixelSize),avg);
+        }
+        
+        if (fixed_palette) 
+        {
+            avg = calculateColorFixedStat(avg, pixelSize);
+        }
+        
+        return blockTex(false, blockUv, avg);
+    }
+}
+
 float4 mainImage(VertData v_in) : TARGET
 {	
 	float2 uv = v_in.uv;
@@ -476,13 +615,13 @@ float4 mainImage(VertData v_in) : TARGET
 			return image.Sample(textureSampler,uv);
 		}
 	}
-	
-	
+
 	
 	if (inBox(uv)) { //in play area		
+
 		float bw = blockWidth();
-		float bh = blockHeight();
-		
+        float bh = blockHeight();
+        
 		float fblx = field_left_x/256.0;
 		float fbty = field_top_y /224.0;
 		
@@ -490,39 +629,7 @@ float4 mainImage(VertData v_in) : TARGET
 		float centreyUv = floor((uv.y - fbty) / bh) * bh + fbty + bh/2.0;
 		float2 centre = float2(centrexUv,centreyUv);
 		
-		float blockxUv = (((uv.x - fblx) * 256.0) % (bw * 256.0)) / (bw * 256.0);
-		float blockyUv = (((uv.y - fbty) * 224.0) % (bh * 224.0)) / (bh * 224.0);
-		float2 blockUv = float2(blockxUv,blockyUv);
-		float4 avg = sampleBlock(float2(centrexUv,centreyUv), pixelSize);
-		
-		//now we have two scenarios - centre is white, or not
-		if (isBlack(avg)) {
-			return float4(0.0,0.0,0.0,1.0);
-		} else if (isWhite(avg)) {
-			if (stat_palette_white) {
-				avg = palette1(pixelSize);				
-			} else {
-				avg = sampleEdge(float2(centrexUv,centreyUv), pixelSize);
-			}
-						
-			if (fixed_palette) 
-			{
-				avg = calculateColorFixedStat(avg, pixelSize);
-			}
-						
-			return blockTex(true, blockUv, avg);
-		} else {							
-			if (stat_palette) {
-				avg = matchPalette(palette1(pixelSize),palette2(pixelSize),avg);
-			}
-			
-			if (fixed_palette) 
-			{
-				avg = calculateColorFixedStat(avg, pixelSize);
-			}
-			
-			return blockTex(false, blockUv, avg);
-		}
+        return drawBlock(uv, centre, fblx, fbty);		
 		
 	} else if (sharpen_stats && inBox2(uv,stat_box())) {        
         float width = (stat_i_right_x - stat_i_left_x) / 256.0;
@@ -577,6 +684,9 @@ float4 mainImage(VertData v_in) : TARGET
 			
         }
 
+    } else if (sharpen_preview && inBox2(uv,preview_box())) {
+        return do_sharpen_preview(uv);
+    
     } else {
 		return image.Sample(textureSampler, v_in.uv);
 	}	
