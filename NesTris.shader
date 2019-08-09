@@ -320,12 +320,14 @@ bool isInGame(float2 pixelSize)
 
 bool isGameOver(float2 pixelSize)
 {	
-	float startX = 12/32.0;
-	float startY = 5/28.0 + 1/56.0;	
+	//field is 80 pixels wide
+	//field is 160 pixels tall.
+	float startX = field_left_x/256 + 4*pixelSize.x;
+	float startY = field_top_y/224 + 4*pixelSize.y;
 		
-	float4 topleft = sampleBlock(float2(startX + 1/64.0, startY + 1/56.0), pixelSize);
-	float4 topmid = sampleBlock(float2(startX + 11/64.0, startY + 1/56.0), pixelSize);
-	float4 topright = sampleBlock(float2(startX + 19/64.0, startY + 1/56.0), pixelSize);
+	float4 topleft =  sampleBlock(float2(startX,                  startY), pixelSize);
+	float4 topmid =   sampleBlock(float2(startX + 40*pixelSize.x, startY), pixelSize);
+	float4 topright = sampleBlock(float2(startX + 70*pixelSize.x, startY), pixelSize);
 	
 	if (isBlack(topleft) || isBlack(topmid) || isBlack(topright)) {
 		return false;
