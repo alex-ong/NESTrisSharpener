@@ -19,7 +19,7 @@ Note that this shader assumes a perfectly deinterlaced image.
 Below is a problem that is not solvable if your image is interlaced - we can't figure out the block because the image isn't clean:
 ![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/interlaced.png)
 
-* The easiest way to de-interlace your image is to select your video source, choose de-interlace, and select "retro".
+* The easiest way to de-interlace your image is to select your video source, choose de-interlace, and select "yadif-2x".
 * Next, if the game image bobs up and down violently, you'll have to select the "first" field and change it.
 
 
