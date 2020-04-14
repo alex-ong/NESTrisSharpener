@@ -3,11 +3,11 @@
 A simple OBS shader for upscaling graphics.
 
 # Download and installation
-1) Download and install this plugin:
-* Download: https://github.com/Oncorporation/obs-shaderfilter/releases
+1) Download and install this plugin (obs-shaderfilter):
 * Info/Install: [\[read this\]](https://github.com/Oncorporation/obs-shaderfilter) [\[download here\]](https://github.com/Oncorporation/obs-shaderfilter/releases/download/v1.0/obs-shaderfilter-win.zip) (tl;dr unzip to correct place and override)
+* Latest release of the plugin: https://github.com/Oncorporation/obs-shaderfilter/releases
 * Alternate clarification images: https://imgur.com/a/vWVJ2Sy
-2) Download this repository by clicking this [link](https://github.com/alex-ong/NESTrisSharpener/archive/master.zip), and then unzipping it somewhere.
+2) Download NESTrisSharpener by clicking this [link](https://github.com/alex-ong/NESTrisSharpener/archive/master.zip), and then unzipping it somewhere.
 3) Open OBS. Add your video source (i.e. NES Tetris composite AV signal, or youtube screen capture, or whatever)
 3) Add filter... (right click on video source, hit "filter")
 5) Add a new "User-defined shader"
