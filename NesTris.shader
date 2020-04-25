@@ -532,8 +532,9 @@ float4 do_sharpen_preview(float2 uv)
     //every piece but o and i are offset on x.
     if (result != 3 && result != 6) { 
         fblx += bw / 2.0;
-        float limit = (preview_right_x / 256.0) - (bw * 0.375);
-        if (uv.x > limit) 
+        float limit = (preview_right_x / 256.0) - (bw * 0.625);
+		float limit2 = (preview_left_x / 256.0) + (bw * 0.5);
+        if (uv.x > limit || uv.x < limit2) 
         {
             return float4(0.0,0.0,0.0,1.0);
         }
