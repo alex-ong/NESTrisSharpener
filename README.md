@@ -1,4 +1,4 @@
-![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/hero-image.png)
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/hero-image.png)
 # NESTrisSharpener
 A simple OBS shader for upscaling graphics.
 
@@ -18,7 +18,7 @@ A simple OBS shader for upscaling graphics.
 # Interlacing
 Note that this shader assumes a perfectly deinterlaced image.
 Below is a problem that is not solvable if your image is interlaced - we can't figure out the block because the image isn't clean:
-![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/interlaced.png)
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/interlaced.png)
 
 * The easiest way to de-interlace your image is to select your video source, choose de-interlace, and select "yadif-2x".
 * Next, if the game image bobs up and down violently, you'll have to select the "first" field and change it.
@@ -29,7 +29,7 @@ Now, we will quickly calibrate the image
 * First, make sure your video source is only game image, with no borders. If it isn't aligned properly, try to add a crop/pad filter before this in the chain, so that it lines up.
 * Next, we have to set all the appropriate values. Below are descriptions of sections and some default values that work well.
 
-![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/calibration.png)
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/calibration.png)
 # setup_mode
 This is ticked by default, to set calibration up. when you are done, untick it.
 
@@ -45,7 +45,7 @@ This section defines where your field is. Values range from 0 to 256. You can us
 
 You want the field to skirt the block-grid (not the board) perfectly.
 This means there should be a clear 1-2 nes pixel gap between the bottom of the field and the field border.
-
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/field-indepth.png)
 # stat_palette_white, stat_palette, fixed_palette
 Enabling stat_palette_white means white blocks with coloured borders get their color from the statistics bar on the left.
 This results in uniform looking white blocks.
@@ -59,9 +59,9 @@ Look at palette options (bottom of this page) for more details.
 
 | Name                 | default value    | 
 | -------------        |---------------   |
-| stat_palette_white   | true (ticked)    |
-| stat_palette         | false (unticked) |
-| fixed_palette        | false (unticked) |
+| stat_palette_white   | <ul><li>- [x] </li></ul>   |
+| stat_palette         | <ul><li>- [ ] </li></ul> |
+| fixed_palette        | <ul><li>- [ ] </li></ul> |
 
 # paletteA1, paletteA2, paletteB1, paletteB2
 If you have stat_palette_white, stat_palette or fixed_palette enabled, you can set the locations of some reference blocks in the image.
@@ -81,13 +81,14 @@ If you have stat_palette_white, stat_palette or fixed_palette enabled, you can s
 | paletteB_y2    | 170           |
 
 These palette settings are used to determine the colors of your blocks. You'll want to select a pixel of "pure color"
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/pure-color.png)
 
 # sharpen_stats
 This section enables the sharpening of your statistics window
 
 | Name           | default value   |
 | -------------- | -------------   |
-| sharpen_stats  | false (unticked)   |
+| sharpen_stats  | <ul><li>- [ ] </li></ul>   |
 | stats_image    | blocks-stat.png |
 | stat_t_top_y   | 87              |
 | stat_i_left_x  | 24              |
@@ -102,14 +103,14 @@ This section enables the sharpening of your preview window
 
 | Name                 | default value   |
 | --------------       | -------------   |
-| sharpen_preview      | true (ticked)   |
+| sharpen_preview      | <ul><li>- [x] </li></ul>   |
 | preview_left_x       | 192             |
 | preview_right_x      | 223             |
 | preview_top_y        | 112             |
 | preview_bottom_y     | 128             |
 
 The preview window expects you to hug 2x4 tile preview area as perfectly as possible:
-
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/preview.png)
 
 The algorithm for sharpening preview is the same as for your field. This means for best results, use and calibrate fixed_palette.
 
@@ -119,8 +120,8 @@ skip_detect_game_over - if you tick this, we will always be in game mode. if it 
 
 | Name                  | default value   | 
 | -------------         |-----------------|
-| skip_detect_game      | false (unticked)|
-| skip_detect_game_over | false (unticked)|
+| skip_detect_game      | <ul><li>- [ ] </li></ul>|
+| skip_detect_game_over | <ul><li>- [ ] </li></ul>|
 
 The next settings are the locations of a few squares that we use to figure out if we are in game mode:
 
@@ -139,7 +140,7 @@ to calculate which exact scene we are in.
 
 # Palette options (advanced, higher quality)
 
-![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/palette-comparison.png)
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/palette-comparison.png)
 
 Here is a more detailed explanation of how the palette options work.
 
@@ -147,7 +148,7 @@ Here is a more detailed explanation of how the palette options work.
 * stat_palette - non-white blocks get their fill color from the statistics window to the left of playfield. Enabling this will lead to more uniform colors. Disabling this will lead to more variance in block colors.
 * fixed_palette - First, looks at statistics window to figure out which level we are on. Compares colors in statistics window to fixed_palette_image. After this, looks at the block and matches it between the valid colors for that level. Note that for this option to work correctly, you should first record a video of the first ten levels. Then get the block colors for each of your levels and calibrate the fixed_palette file.
 
-![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/palette-calibrate.png)
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/palette-calibrate.png)
 
 # menu overlay
 * menu_overlay - image that you want to display during menu screens
@@ -156,5 +157,5 @@ Here is a more detailed explanation of how the palette options work.
 # Conclusion
 I hope that this project helped sharpen your video capture / streaming! If you liked this project, please star this project!
 
-![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/starme.png)
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/starme.png)
 
