@@ -45,7 +45,10 @@ This section defines where your field is. Values range from 0 to 256. You can us
 
 You want the field to skirt the block-grid (not the board) perfectly.
 This means there should be a clear 1-2 nes pixel gap between the bottom of the field and the field border.
+
 ![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/field-indepth.png)
+
+
 # stat_palette_white, stat_palette, fixed_palette
 Enabling stat_palette_white means white blocks with coloured borders get their color from the statistics bar on the left.
 This results in uniform looking white blocks.
@@ -81,6 +84,7 @@ If you have stat_palette_white, stat_palette or fixed_palette enabled, you can s
 | paletteB_y2    | 170           |
 
 These palette settings are used to determine the colors of your blocks. You'll want to select a pixel of "pure color"
+
 ![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/pure-color.png)
 
 # sharpen_stats
@@ -110,6 +114,7 @@ This section enables the sharpening of your preview window
 | preview_bottom_y     | 128             |
 
 The preview window expects you to hug 2x4 tile preview area as perfectly as possible:
+
 ![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/preview.png)
 
 The algorithm for sharpening preview is the same as for your field. This means for best results, use and calibrate fixed_palette.
