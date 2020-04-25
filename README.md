@@ -42,6 +42,8 @@ This section defines where your field is. Values range from 0 to 256. You can us
 | field_right_x  | 176           |
 | field_top_y    | 43            |
 | field_bottom_y | 196           |
+You want the field to skirt the block-grid (not the board) perfectly.
+This means there should be a clear 1-2 nes pixel gap between the bottom of the field and the field border.
 
 # stat_palette_white, stat_palette, fixed_palette
 Enabling stat_palette_white means white blocks with coloured borders get their color from the statistics bar on the left.
@@ -77,6 +79,8 @@ If you have stat_palette_white, stat_palette or fixed_palette enabled, you can s
 | paletteB_x2    | 30            |
 | paletteB_y2    | 170           |
 
+These palette settings are used to determine the colors of your blocks. You'll want to select a pixel of "pure color"
+
 # sharpen_stats
 This section enables the sharpening of your statistics window
 
@@ -103,6 +107,8 @@ This section enables the sharpening of your preview window
 | preview_top_y        | 112             |
 | preview_bottom_y     | 128             |
 
+The preview window expects you to hug 2x4 tile preview area as perfectly as possible:
+
 
 The algorithm for sharpening preview is the same as for your field. This means for best results, use and calibrate fixed_palette.
 
@@ -127,7 +133,8 @@ The next settings are the locations of a few squares that we use to figure out i
 | game_grey_y1          | 214|
 
 If we detect black in both locations specified as well as grey in the bottom left corner, we assume that we aren't in a menu.
-
+When you are in menus, you will notice that these specific blocks change color from grey to black. We use a combination of these
+to calculate which exact scene we are in.
 
 # Palette options (advanced, higher quality)
 
