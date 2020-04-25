@@ -1,9 +1,9 @@
 uniform texture2d block_image;
 
 uniform bool setup_mode = true;
-uniform float lines_x = 151;
-uniform float lines_xWidth = 7;
-uniform float lines_y = 21;
+uniform float lines_x = 72.00;
+uniform float lines_xWidth = 4.63;
+uniform float lines_y = 152;
 uniform float lines_yHeight = 7;
 
 
