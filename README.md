@@ -42,6 +42,7 @@ This section defines where your field is. Values range from 0 to 256. You can us
 | field_right_x  | 176           |
 | field_top_y    | 43            |
 | field_bottom_y | 196           |
+
 You want the field to skirt the block-grid (not the board) perfectly.
 This means there should be a clear 1-2 nes pixel gap between the bottom of the field and the field border.
 
