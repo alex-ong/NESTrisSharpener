@@ -3,17 +3,24 @@
 A simple OBS shader for upscaling graphics.
 
 # Download and installation
-1) Download and install this plugin (obs-shaderfilter):
+1) Installing obs-shader-filter
 * Info/Install: [\[read this\]](https://github.com/Oncorporation/obs-shaderfilter) [\[download here\]](https://github.com/Oncorporation/obs-shaderfilter/releases/download/v1.0/obs-shaderfilter-win.zip) (tl;dr unzip to correct place and override)
 * Latest release of the plugin: https://github.com/Oncorporation/obs-shaderfilter/releases
 * Alternate clarification images: https://imgur.com/a/vWVJ2Sy
-2) Download NESTrisSharpener by clicking this [link](https://github.com/alex-ong/NESTrisSharpener/archive/master.zip), and then unzipping it somewhere.
-3) Open OBS. Add your video source (i.e. NES Tetris composite AV signal, or youtube screen capture, or whatever)
-3) Add filter... (right click on video source, hit "filter")
-5) Add a new "User-defined shader"
-6) Shader Text file -> Browse -> Nestris.shader
-7) block_image  -> Browse -> blocks.png
-8) fixed_palette_image -> Browse -> fixed_palette.png
+
+Do not proceed to step 2 until you have confirmed that obs-shader-filter is installed.
+**You should be able to right click a source (or scene) and add a video effect called "User-defined shader".**
+
+2) Installing NESTrisSharpener:
+* Download NESTrisSharpener by clicking this [link](https://github.com/alex-ong/NESTrisSharpener/archive/master.zip), and then unzipping it somewhere.
+* Open OBS. Set up a [stencil-ready](http://bit.ly/TheStencil) **scene**.
+* Right click the **scene** (*not the video source*), and select **Filters**
+* Add a filter by pressing the "+" on the bottom right
+* Add a new "User-defined shader"
+* Shader Text file -> Browse -> nestris-stencil.shader
+* Scroll down to "block_iamge", and select **blocks.png**
+* Calibrate (look below for instructions)
+* Untick "setup mode"
 
 # Interlacing
 Note that this shader assumes a perfectly deinterlaced image.
