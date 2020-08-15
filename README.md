@@ -9,7 +9,8 @@ A simple OBS shader for upscaling graphics.
 * Alternate clarification images: https://imgur.com/a/vWVJ2Sy
 
 Do not proceed to step 2 until you have confirmed that obs-shader-filter is installed.
-**You should be able to right click a source (or scene) and add a video effect called "User-defined shader".**
+
+**You should be able to right click a source (or scene) -> Filters -> "+" -> "User-defined shader".**
 
 2) Installing NESTrisSharpener:
 * Download NESTrisSharpener by clicking this [link](https://github.com/alex-ong/NESTrisSharpener/archive/master.zip), and then unzipping it somewhere.
