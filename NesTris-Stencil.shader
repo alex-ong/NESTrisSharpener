@@ -35,6 +35,12 @@ uniform float game_grey_x1 = 23.5;
 uniform float game_grey_y1 = 218.6;
 
 
+sampler_state defaultSampler {
+        Filter      = Point;
+        AddressU    = Clamp;
+        AddressV    = Clamp;
+};
+
 float myLerp(float start, float end, float perc)
 {
     return start + (end-start) * perc;
@@ -207,7 +213,7 @@ float4 blockTex(bool white, float2 uv, float4 base) {
 		uv = float2(uv.x / 2.0 + 0.5, uv.y);
 	}
 
-	float4 result = block_image.Sample(textureSampler, uv);
+	float4 result = block_image.Sample(defaultSampler, uv);
 	if (result.a == 0.0) {
 		return base;
 	} else {

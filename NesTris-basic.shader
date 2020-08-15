@@ -44,6 +44,12 @@ uniform float game_grey_y1 = 214;
 uniform texture2d menu_overlay;
 uniform bool show_menu_overlay;
 
+sampler_state defaultSampler {
+        Filter      = Point;
+        AddressU    = Clamp;
+        AddressV    = Clamp;
+};
+
 float myLerp(float start, float end, float perc)
 {
     return start + (end-start) * perc;
@@ -219,7 +225,7 @@ float4 blockTex(bool white, float2 uv, float4 base) {
 		uv = float2(uv.x / 2.0 + 0.5, uv.y);
 	}
 
-	float4 result = block_image.Sample(textureSampler, uv);
+	float4 result = block_image.Sample(defaultSampler, uv);
 	if (result.a == 0.0) {
 		return base;
 	} else {
