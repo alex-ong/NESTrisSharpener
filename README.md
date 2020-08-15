@@ -18,10 +18,10 @@ Do not proceed to step 2 until you have confirmed that obs-shader-filter is inst
 * Right click the **scene** (*not the video source*), and select **Filters**
 * Add a filter by pressing the "+" on the bottom right
 * Add a new "User-defined shader"
-* Shader Text file -> Browse -> nestris-stencil.shader
-* Scroll down to "block_iamge", and select **blocks.png**
+* Shader Text file -> Browse -> **nestris-stencil.shader**
+* Scroll down to "block_image", and select **blocks.png**
 * Calibrate (look below for instructions)
-* Untick "setup mode"
+* Untick "**setup mode**"
 
 # Interlacing
 Note that this shader assumes a perfectly deinterlaced image.
