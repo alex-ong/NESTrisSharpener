@@ -142,7 +142,7 @@ float pixelHeightUV()
 	return bh/8.0;
 }
 
-float pixelUV()
+float2 pixelUV()
 {
 	return float2(pixelWidthUV(),pixelHeightUV());
 }
@@ -472,8 +472,8 @@ float4 drawBlock(float2 uv, float2 centre, float gridCornerX, float gridCornerY)
     float bw = blockWidth();
     float bh = blockHeight();
     
-    float blockxUv = (((uv.x - gridCornerX) * 256.0) % (bw * 256.0)) / (bw * 256.0);
-    float blockyUv = (((uv.y - gridCornerY) * 224.0) % (bh * 224.0)) / (bh * 224.0);
+    float blockxUv = mod((uv.x - gridCornerX) * 256.0 , bw * 256.0) / (bw * 256.0);
+    float blockyUv = mod((uv.y - gridCornerY) * 224.0 , bh * 224.0) / (bh * 224.0);
     float2 pixelSize = pixelUV();
     float2 blockUv = float2(blockxUv,blockyUv);
     float4 avg = sampleBlock(centre, pixelSize);

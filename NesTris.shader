@@ -67,7 +67,7 @@ float distPoints(float2 a, float2 b)
 
 float3 closest_stat(float2 uv)
 {
-    const float2 test[28] = {
+    const float2 test[28] = float2[28](
     float2(0.195, 0.023), //T
     float2(0.456, 0.023),
     float2(0.727, 0.023),
@@ -101,7 +101,7 @@ float3 closest_stat(float2 uv)
     float2(0.195, 0.782),//L
     float2(0.456, 0.782),
     float2(0.727, 0.782),
-    float2(0.195, 0.840)};
+    float2(0.195, 0.840));
 
 
     float min_dist = distPoints(uv,test[0]);
@@ -154,7 +154,7 @@ float pixelHeightUV()
 	return bh/8.0;
 }
 
-float pixelUV()
+float2 pixelUV()
 {
 	return float2(pixelWidthUV(),pixelHeightUV());
 }
@@ -563,8 +563,8 @@ float4 drawBlock(float2 uv, float2 centre, float gridCornerX, float gridCornerY)
     float bw = blockWidth();
     float bh = blockHeight();
     
-    float blockxUv = (((uv.x - gridCornerX) * 256.0) % (bw * 256.0)) / (bw * 256.0);
-    float blockyUv = (((uv.y - gridCornerY) * 224.0) % (bh * 224.0)) / (bh * 224.0);
+    float blockxUv = mod(((uv.x - gridCornerX) * 256.0) , (bw * 256.0)) / (bw * 256.0);
+    float blockyUv = mod(((uv.y - gridCornerY) * 224.0) , (bh * 224.0)) / (bh * 224.0);
     float2 pixelSize = pixelUV();
     float2 blockUv = float2(blockxUv,blockyUv);
     float4 avg = sampleBlock(centre, pixelSize);
@@ -663,7 +663,7 @@ float4 mainImage(VertData v_in) : TARGET
 			float2 global_uv = float2(stat_i_left_x/256.0 + local_uv.x * width,
 									  stat_t_top_y/224.0 + local_uv.y * height);
             float4 col = sampleBlock(global_uv, pixelSize);
-			int blockType = round(block_uv.z);			
+			int blockType = int(round(block_uv.z));			
 			
 			if (blockStatIsWhite(blockType)) 
 			{
