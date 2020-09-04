@@ -79,7 +79,7 @@ float score_row (float4 raw_box, int row, float2 start_raw, float2 start_ref, fl
 float score_number(float4 raw_box, int i)
 {
     float result = 0.0;
-    int num_pix = 7.0;
+    int num_pix = 7;
     float raw_pix_width = (raw_box.g - raw_box.r)/num_pix;
     float raw_pix_height = (raw_box.a - raw_box.b)/num_pix;
     float raw_pix_width2 = raw_pix_width/2.0;
@@ -115,10 +115,10 @@ float score_number(float4 raw_box, int i)
 }
 
 //loop needs to be unrolled to minimise compilation time.
-int score_all(float4 raw_box)
+float score_all(float4 raw_box)
 {
-    int result = 0;
-    int min_score = 1000000;
+    float result = 0;
+    float min_score = 1000000;
 
     float score;
     score = score_number(raw_box, 0);
@@ -220,7 +220,7 @@ float4 draw_main_split(float2 uv, int i)
     float4 box = split_box(line_box(),3, i);
     if (inBox2(uv, box))
     {
-        int result = score_all(box);
+        float result = score_all(box);
         float2 pos = inbox_inverseLerp(uv,box);
         float4 targetBox = float4(result/10.0,(result+1)/10.0,0.0,1.0);
         float2 target = inbox_lerp(pos,targetBox);
