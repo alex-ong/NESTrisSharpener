@@ -74,12 +74,12 @@ float3 closest_stat(float2 uv)
     float2(0.594, 0.486),
     float2(0.334, 0.546),
     float2(0.594, 0.546),
-    
+
     float2(0.109, 0.976), //I
     float2(0.370, 0.976),
     float2(0.631, 0.976),
     float2(0.892, 0.976),
-    
+
     float2(0.195, 0.165),//J
     float2(0.456, 0.165),
     float2(0.727, 0.165),
@@ -89,7 +89,7 @@ float3 closest_stat(float2 uv)
     float2(0.727, 0.637),
     float2(0.195, 0.695),
     float2(0.456, 0.695),
-    
+
     float2(0.195, 0.329),//Z
     float2(0.456, 0.329),
     float2(0.456, 0.386),
@@ -103,7 +103,7 @@ float3 closest_stat(float2 uv)
 
     float min_dist = distPoints(uv,test[0]);
     int result = 0;
-    
+
     for (int i = 1; i < 28; i++)
     {
         float dist = distPoints(uv,test[i]);
@@ -156,7 +156,7 @@ float2 pixelUV()
 	return float2(pixelWidthUV(),pixelHeightUV());
 }
 
-bool inBox(float2 uv) {	
+bool inBox(float2 uv) {
 	float startX = field_left_x / 256.0;
 	float endX = field_right_x / 256.0;
 	float startY = field_top_y / 224.0;
@@ -166,9 +166,9 @@ bool inBox(float2 uv) {
 
 bool inBox2(float2 uv, float4 box)
 {
-	return (uv.x >= box.r && 
-			uv.x <= box.g && 
-			uv.y >= box.b && 
+	return (uv.x >= box.r &&
+			uv.x <= box.g &&
+			uv.y >= box.b &&
 			uv.y <= box.a);
 }
 
@@ -210,16 +210,16 @@ float4 preview_box() { return float4(preview_left_x / 256.0,
                                      preview_right_x / 256.0,
                                      preview_top_y / 224.0,
                                      preview_bottom_y / 224.0); }
-    
+
 float2 prev_offset1() { return float2(myLerp(preview_left_x,preview_right_x, 0.30) / 256.0,
                                       myLerp(preview_top_y,preview_bottom_y, 0.875) / 224.0); }
 float2 prev_offset2() { return float2(myLerp(preview_left_x,preview_right_x, 0.4375) / 256.0,
                                       myLerp(preview_top_y,preview_bottom_y, 0.875) / 224.0); }
 float2 prev_offset3() { return float2(myLerp(preview_left_x,preview_right_x, 0.6875) / 256.0,
-                                      myLerp(preview_top_y,preview_bottom_y, 0.875) / 224.0); }                                      
+                                      myLerp(preview_top_y,preview_bottom_y, 0.875) / 224.0); }
 
-float4 blockTex(bool white, float2 uv, float4 base) {	
-	if (!white) {	
+float4 blockTex(bool white, float2 uv, float4 base) {
+	if (!white) {
 		uv = float2(uv.x / 2.0, uv.y);
 	} else {
 		uv = float2(uv.x / 2.0 + 0.5, uv.y);
@@ -230,13 +230,13 @@ float4 blockTex(bool white, float2 uv, float4 base) {
 		return base;
 	} else {
 		return result;
-	}		
-	
+	}
+
 }
 
 bool isWhite(float4 rgba) {
 	float limit = 0.6;
-	return (rgba.r >= limit && 
+	return (rgba.r >= limit &&
 			rgba.g >= limit &&
 			rgba.b >= limit);
 }
@@ -251,23 +251,23 @@ bool isGrey(float4 rgba) {
 	return (rgba.r >= 0.5 - limit && rgba.r <= 0.5 + limit &&
 			rgba.g >= 0.5 - limit && rgba.g <= 0.5 + limit &&
 			rgba.b >= 0.5 - limit && rgba.b <= 0.5 + limit);
-	
+
 }
 
-float4 palette1(float2 pixelSize) 
+float4 palette1(float2 pixelSize)
 {
 	return (sampleBlock(paletteA1_uv(), pixelSize) +
 			sampleBlock(paletteA2_uv(), pixelSize)) / 2.0;  //S Piece
 }
 
-float4 palette2(float2 pixelSize) 
+float4 palette2(float2 pixelSize)
 {
 	return (sampleBlock(paletteB1_uv(), pixelSize) +
 	        sampleBlock(paletteB2_uv(), pixelSize)) / 2.0; // L piece
 }
 
 float4 matchPalette(float4 p1, float4 p2, float4 col)
-{	
+{
 	float dist1 = colorDist(p1,col);
 	float dist2 = colorDist(p2,col);
 	if (dist1 < dist2) {
@@ -279,7 +279,7 @@ float4 matchPalette(float4 p1, float4 p2, float4 col)
 
 //Simple 4 sample of centre of 3x3 block
 float4 sampleBlock(float2 uv, float2 pixelSize)
-{	
+{
 	float4 centre = image.Sample(textureSampler, uv);
 	//float4 tl = image.Sample(textureSampler,float2(uv.x - pixelSize.x, uv.y - pixelSize.y));
 	float4 tr = image.Sample(textureSampler,float2(uv.x + pixelSize.x, uv.y - pixelSize.y));
@@ -298,7 +298,7 @@ float4 sampleEdge(float2 uv, float2 pixelSize)
 	float topyUv = uv.y + 2.5 * pixelSize.y;
 	float bottomyUv = uv.y - 3.5 * pixelSize.y;
 	float4 top = image.Sample(textureSampler, float2(uv.x, topyUv));
-	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));			
+	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));
 	return (top + bottom) / 2.0;
 }
 
@@ -307,12 +307,12 @@ float4 sampleEdgeStat(float2 uv, float2 pixelSize)
 	float topyUv = uv.y + 1.5 * pixelSize.y;
 	float bottomyUv = uv.y - 2.5 * pixelSize.y;
 	float4 top = image.Sample(textureSampler, float2(uv.x, topyUv));
-	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));			
+	float4 bottom = image.Sample(textureSampler, float2(uv.x, bottomyUv));
 	return (top + bottom) / 2.0;
 }
 
 bool isInGame(float2 pixelSize)
-{	
+{
 	float4 black1 = sampleBlock(gameBlack1_uv(), pixelSize); //black box next to "LINES";
 	float4 black2 = sampleBlock(gameBlack2_uv(), pixelSize); //black box of "TOP/SCORE"
 	float4 grey1 = sampleBlock(gameGrey1_uv(), pixelSize); //grey box of bottom middle left
@@ -322,29 +322,29 @@ bool isInGame(float2 pixelSize)
 //if top edge is not black, we assume game over.
 
 bool isGameOver(float2 pixelSize)
-{	
+{
 	//field is 80 pixels wide
 	//field is 160 pixels tall.
 	float startX = field_left_x/256 + 4*pixelSize.x;
 	float startY = field_top_y/224 + 4*pixelSize.y;
-		
+
 	float4 topleft =  sampleBlock(float2(startX,                  startY), pixelSize);
 	float4 topmid =   sampleBlock(float2(startX + 40*pixelSize.x, startY), pixelSize);
 	float4 topright = sampleBlock(float2(startX + 70*pixelSize.x, startY), pixelSize);
-	
+
 	if (isBlack(topleft) || isBlack(topmid) || isBlack(topright)) {
 		return false;
 	} else {
 		return true;
 	}
-	
+
 }
 
 
 //Low cost color distance
 //https://www.compuphase.com/cmetric.htm
 float colorDist(float4 e1, float4 e2)
-{	
+{
 	float r = (e1.r-e2.r);
 	float g = (e1.g-e2.g);
 	float b = (e1.b-e2.b);
@@ -359,32 +359,32 @@ float colorDist(float4 e1, float4 e2)
 float4 setupDraw(float2 uv)
 {
 	float2 pixelSize = pixelUV();
-	
+
 	float4 orig = image.Sample(textureSampler, uv);
 	if (inBox(uv))
-	{		
-		return (float4(1.0,0.0,0.0,1.0) + orig) / 2.0;	
-	} 
-	
+	{
+		return (float4(1.0,0.0,0.0,1.0) + orig) / 2.0;
+	}
+
 	if (stat_palette_white) {
 		if (inBox2(uv, paletteA1_box()))
 		{
-			return (float4(0.0,1.0,0.0,1.0));	
-		} 
-		else if (inBox2(uv, paletteA2_box()))	
-		{
-			return (float4(0.0,1.0,0.0,1.0));	
+			return (float4(0.0,1.0,0.0,1.0));
 		}
-		else if (inBox2(uv, paletteB1_box()))	
+		else if (inBox2(uv, paletteA2_box()))
 		{
-			return (float4(1.0,0.0,0.0,1.0));	
+			return (float4(0.0,1.0,0.0,1.0));
 		}
-		else if (inBox2(uv, paletteB2_box()))	
+		else if (inBox2(uv, paletteB1_box()))
 		{
-			return (float4(1.0,0.0,0.0,1.0));	
+			return (float4(1.0,0.0,0.0,1.0));
+		}
+		else if (inBox2(uv, paletteB2_box()))
+		{
+			return (float4(1.0,0.0,0.0,1.0));
 		}
 	}
-    
+
     if (sharpen_stats) {
         if (inBox2(uv, stat_box()))
         {
@@ -396,11 +396,11 @@ float4 setupDraw(float2 uv)
 			if (inBox2(float2(xPerc,yPerc),pixBoxStat(float2(a.x,a.y),1))) {
 				return (float4(1.0,1.0,0.0,0.2) + orig);
 			}
-			
+
             return (float4(0.3,0.3,1.0,1.0) + orig) / 2.0;
         }
     }
-	
+
     if (sharpen_preview)
     {
         if (inBox2(uv, preview_box()))
@@ -411,13 +411,13 @@ float4 setupDraw(float2 uv)
                 return float4(1.0,0.0,0.0,1.0);
             } else if (inBox2(uv, pixBox(prev_offset3(),1))) {
                 return float4(1.0,0.0,1.0,1.0);
-            } else {            
+            } else {
                 return (float4(0.3,1.0,0.3,1.0) + orig) / 2.0;
             }
         }
     }
-    
-	if (!skip_detect_game) 
+
+	if (!skip_detect_game)
 	{
 		if (inBox2(uv, gameBlack1_box())) {
 			return float4(0.0,0.0,1.0,1.0);
@@ -427,9 +427,9 @@ float4 setupDraw(float2 uv)
 			return float4(0.0,0.0,1.0,1.0);
 		}
 	}
-		
+
 	return image.Sample(textureSampler, uv);
-	
+
 }
 
 
@@ -437,7 +437,7 @@ int whichPiece(bool o, bool r, bool p)
 {
     //0123456
     //TJZOSLI
-    if (o) 
+    if (o)
     {
         if (r) {
             if (p) {
@@ -446,11 +446,11 @@ int whichPiece(bool o, bool r, bool p)
             return 4; //S
         }
         return 5; //L
-    } else if (r) {        
+    } else if (r) {
         if (p) {
             return 2; //z
         }
-        return 0; //t        
+        return 0; //t
     } else if (p) {
         return 1; //j
     } else {
@@ -463,7 +463,7 @@ float4 do_sharpen_preview(float2 uv)
     bool o = !isBlack(image.Sample(textureSampler, prev_offset1()));
     bool r = !isBlack(image.Sample(textureSampler, prev_offset2()));
     bool p = !isBlack(image.Sample(textureSampler, prev_offset3()));
-    
+
     //figure out which result.
     int result = whichPiece(o,r,p);
     //TJZOSLI = 0->6;
@@ -471,26 +471,26 @@ float4 do_sharpen_preview(float2 uv)
     float bh = blockHeight();
     float fblx = preview_left_x/256.0;
     float fbty = preview_top_y /224.0;
-    
+
     //every piece but o and i are offset on x.
-    if (result != 3 && result != 6) { 
+    if (result != 3 && result != 6) {
         fblx += bw / 2.0;
         float limit = (preview_right_x / 256.0) - (bw * 0.375);
-        if (uv.x > limit) 
+        if (uv.x > limit)
         {
             return float4(0.0,0.0,0.0,1.0);
         }
     }
-    
+
     if (result == 6) //i piece offset on y.
     {
         fbty += blockHeight() / 2.0;
     }
-       
-    float centrexUv = floor((uv.x - fblx) / bw) * bw + fblx + bw/2.0;		
+
+    float centrexUv = floor((uv.x - fblx) / bw) * bw + fblx + bw/2.0;
     float centreyUv = floor((uv.y - fbty) / bh) * bh + fbty + bh/2.0;
     float2 centre = float2(centrexUv,centreyUv);
-    
+
     return drawBlock(uv, centre, fblx, fbty);
 }
 
@@ -498,25 +498,25 @@ float4 drawBlock(float2 uv, float2 centre, float gridCornerX, float gridCornerY)
 {
     float bw = blockWidth();
     float bh = blockHeight();
-    
+
     float blockxUv = mod(((uv.x - gridCornerX) * 256.0) , (bw * 256.0)) / (bw * 256.0);
     float blockyUv = mod(((uv.y - gridCornerY) * 224.0) , (bh * 224.0)) / (bh * 224.0);
     float2 pixelSize = pixelUV();
     float2 blockUv = float2(blockxUv,blockyUv);
     float4 avg = sampleBlock(centre, pixelSize);
-    
+
     //now we have two scenarios - centre is white, or not
     if (isBlack(avg)) {
         return float4(0.0,0.0,0.0,1.0);
     } else if (isWhite(avg)) {
         if (stat_palette_white) {
-            avg = palette1(pixelSize);				
+            avg = palette1(pixelSize);
         } else {
             avg = sampleEdge(centre, pixelSize);
         }
-    
+
         return blockTex(true, blockUv, avg);
-    } else {							
+    } else {
         return blockTex(false, blockUv, avg);
     }
 }
@@ -533,55 +533,55 @@ float4 do_show_menu_overlay(float2 uv)
 
 
 float4 mainImage(VertData v_in) : TARGET
-{	
+{
 	float2 uv = v_in.uv;
 	float2 pixelSize = pixelUV();
-	
+
 	if (setup_mode) {
 		return setupDraw(uv);
-	} 
-	
-	if (!skip_detect_game) 
-	{	
+	}
+
+	if (!skip_detect_game)
+	{
 		if (!isInGame(pixelSize)) {
-			if (show_menu_overlay) { 
+			if (show_menu_overlay) {
 				return do_show_menu_overlay(uv);
 			}
-			return image.Sample(textureSampler,uv);	
-		}			
+			return image.Sample(textureSampler,uv);
+		}
 	}
-	
-	if (!skip_detect_game_over) 
-	{		
+
+	if (!skip_detect_game_over)
+	{
 		if (isGameOver(pixelSize)) {
 			return image.Sample(textureSampler,uv);
 		}
 	}
 
-	
-	if (inBox(uv)) { //in play area		
+
+	if (inBox(uv)) { //in play area
 
 		float bw = blockWidth();
         float bh = blockHeight();
-        
+
 		float fblx = field_left_x/256.0;
 		float fbty = field_top_y /224.0;
-		
-		float centrexUv = floor((uv.x - fblx) / bw) * bw + fblx + bw/2.0;		
+
+		float centrexUv = floor((uv.x - fblx) / bw) * bw + fblx + bw/2.0;
 		float centreyUv = floor((uv.y - fbty) / bh) * bh + fbty + bh/2.0;
 		float2 centre = float2(centrexUv,centreyUv);
-		
-        return drawBlock(uv, centre, fblx, fbty);		
-		
-	} else if (sharpen_stats && inBox2(uv,stat_box())) {        
+
+        return drawBlock(uv, centre, fblx, fbty);
+
+	} else if (sharpen_stats && inBox2(uv,stat_box())) {
         float width = (stat_i_right_x - stat_i_left_x) / 256.0;
-        float height = (stat_i_bottom_y - stat_t_top_y) / 224.0;		
-		
-        if (width == 0 || height == 0) 
+        float height = (stat_i_bottom_y - stat_t_top_y) / 224.0;
+
+        if (width == 0 || height == 0)
         {
             return image.Sample(textureSampler, v_in.uv);
         }
-        
+
         float xPerc = (uv.x - stat_i_left_x / 256.0) / width;
         float yPerc = (uv.y - stat_t_top_y / 224.0) / height;
         float4 raw_pix = stats_image.Sample(textureSampler, float2(xPerc,yPerc));
@@ -590,31 +590,31 @@ float4 mainImage(VertData v_in) : TARGET
             return raw_pix;
         } else {
             float3 block_uv = closest_stat(float2(xPerc,yPerc));
-					
+
 			float2 local_uv = float2(block_uv.x, block_uv.y); //localspace
 			//convert to world space
 			float2 global_uv = float2(stat_i_left_x/256.0 + local_uv.x * width,
 									  stat_t_top_y/224.0 + local_uv.y * height);
             float4 col = sampleBlock(global_uv, pixelSize);
-			int blockType = int(round(block_uv.z));			
-			
-			if (blockStatIsWhite(blockType)) 
+			int blockType = int(round(block_uv.z));
+
+			if (blockStatIsWhite(blockType))
 			{
 				if (stat_palette_white) {
-					col = palette1(pixelSize);					
+					col = palette1(pixelSize);
 				} else {
 					col = sampleEdgeStat(global_uv, pixelSize);
 				}
-			}				
-            
+			}
+
             return col;
-			
+
         }
 
     } else if (sharpen_preview && inBox2(uv,preview_box())) {
         return do_sharpen_preview(uv);
-    
+
     } else {
 		return image.Sample(textureSampler, v_in.uv);
-	}	
+	}
 }
