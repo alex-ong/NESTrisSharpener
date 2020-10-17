@@ -64,7 +64,7 @@ float distPoints(float2 a, float2 b)
 
 float3 closest_stat(float2 uv)
 {
-    const float2 test[28] = {
+    const float2 test[28] = float2[28](
     float2(0.195, 0.023), //T
     float2(0.456, 0.023),
     float2(0.727, 0.023),
@@ -98,7 +98,7 @@ float3 closest_stat(float2 uv)
     float2(0.195, 0.782),//L
     float2(0.456, 0.782),
     float2(0.727, 0.782),
-    float2(0.195, 0.840)};
+    float2(0.195, 0.840));
 
 
     float min_dist = distPoints(uv,test[0]);

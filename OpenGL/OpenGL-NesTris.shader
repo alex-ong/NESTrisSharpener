@@ -7,6 +7,9 @@ uniform float field_top_y = 39;
 uniform float field_bottom_y = 199;
 
 uniform bool stat_palette_white = true;
+uniform bool stat_palette;
+uniform bool fixed_palette;
+uniform texture2d fixed_palette_image;
 
 uniform float paletteA_x1 = 29;
 uniform float paletteA_y1 = 103;
@@ -64,7 +67,7 @@ float distPoints(float2 a, float2 b)
 
 float3 closest_stat(float2 uv)
 {
-    const float2 test[28] = {
+    const float2 test[28] = float2[28](
     float2(0.195, 0.023), //T
     float2(0.456, 0.023),
     float2(0.727, 0.023),
@@ -98,7 +101,7 @@ float3 closest_stat(float2 uv)
     float2(0.195, 0.782),//L
     float2(0.456, 0.782),
     float2(0.727, 0.782),
-    float2(0.195, 0.840)};
+    float2(0.195, 0.840));
 
 
     float min_dist = distPoints(uv,test[0]);
@@ -366,7 +369,7 @@ float4 setupDraw(float2 uv)
 		return (float4(1.0,0.0,0.0,1.0) + orig) / 2.0;
 	}
 
-	if (stat_palette_white) {
+	if (stat_palette || stat_palette_white) {
 		if (inBox2(uv, paletteA1_box()))
 		{
 			return (float4(0.0,1.0,0.0,1.0));
@@ -433,6 +436,66 @@ float4 setupDraw(float2 uv)
 }
 
 
+//matches to closest colour out of entire palette
+float4 calculateColorFixed(float4 original)
+{
+	float4 result = float4(1.0,0.0,1.0,1.0);
+	float minDist = 1000000; //1+1+1 = 3 :D
+	for (int i = 0; i < 10; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			float2 uv = float2((i+0.5)/10.0,(j+0.5)/2.0);
+			float4 c = fixed_palette_image.Sample(textureSampler, uv);
+			float dist = colorDist(c,original);
+			if (dist < minDist) {
+				minDist = dist;
+				result = c;
+			}
+		}
+	}
+
+	return result;
+}
+
+//first figures out what level we are on. Then picks out of the current
+//level's colours
+float4 calculateColorFixedStat(float4 original, float2 pixelSize)
+{
+	//first, calculate which level we are...
+	float4 primary = float4(1.0,0.0,1.0,1.0);
+	float4 secondary = float4(1.0,0.0,1.0,1.0);
+	float4 p1 = palette1(pixelSize);
+	float4 p2 = palette2(pixelSize);
+	float minDist = 1000000; //1+1+1 = 3 :D
+	for (int i = 0; i < 10; i++)
+	{
+		float2 uv1 = float2((i+0.5)/10.0,0.25);
+		float2 uv2 = float2((i+0.5)/10.0,0.75);
+		float4 c1 = fixed_palette_image.Sample(textureSampler, uv1);
+		float4 c2 = fixed_palette_image.Sample(textureSampler, uv2);
+		float dist = colorDist(c1,p1) + colorDist(c2,p2);
+		if (dist < minDist) {
+			minDist = dist;
+			primary = c1;
+			secondary = c2;
+		}
+	}
+
+	return matchPalette(primary,secondary,original);
+}
+
+float4 do_show_menu_overlay(float2 uv)
+{
+	float4 mask_pix = menu_overlay.Sample(textureSampler,uv);
+	if (mask_pix.a <= 0.1) {
+		return image.Sample(textureSampler, uv);
+	} else {
+		return mask_pix;
+	}
+}
+
+
 int whichPiece(bool o, bool r, bool p)
 {
     //0123456
@@ -475,8 +538,9 @@ float4 do_sharpen_preview(float2 uv)
     //every piece but o and i are offset on x.
     if (result != 3 && result != 6) {
         fblx += bw / 2.0;
-        float limit = (preview_right_x / 256.0) - (bw * 0.375);
-        if (uv.x > limit)
+        float limit = (preview_right_x / 256.0) - (bw * 0.625);
+		float limit2 = (preview_left_x / 256.0) + (bw * 0.5);
+        if (uv.x > limit || uv.x < limit2)
         {
             return float4(0.0,0.0,0.0,1.0);
         }
@@ -520,22 +584,25 @@ float4 drawBlock(float2 uv, float2 centre, float gridCornerX, float gridCornerY)
             avg = sampleEdge(centre, pixelSize);
         }
 
+        if (fixed_palette)
+        {
+            avg = calculateColorFixedStat(avg, pixelSize);
+        }
+
         return blockTex(true, blockUv, avg);
     } else {
+        if (stat_palette) {
+            avg = matchPalette(palette1(pixelSize),palette2(pixelSize),avg);
+        }
+
+        if (fixed_palette)
+        {
+            avg = calculateColorFixedStat(avg, pixelSize);
+        }
+
         return blockTex(false, blockUv, avg);
     }
 }
-
-float4 do_show_menu_overlay(float2 uv)
-{
-	float4 mask_pix = menu_overlay.Sample(textureSampler,uv);
-	if (mask_pix.a <= 0.1) {
-		return image.Sample(textureSampler, uv);
-	} else {
-		return mask_pix;
-	}
-}
-
 
 float4 mainImage(VertData v_in) : TARGET
 {
@@ -611,6 +678,21 @@ float4 mainImage(VertData v_in) : TARGET
 					col = sampleEdgeStat(global_uv, pixelSize);
 				}
 			}
+
+
+            if (stat_palette) {
+                col = matchPalette(palette1(pixelSize), palette2(pixelSize), col);
+            }
+
+            if (fixed_palette)
+            {
+                if (blockStatIsWhite(blockType) || blockStatIsCol1(blockType))
+				{
+					return calculateColorFixedStat(palette1(pixelSize),pixelSize);
+				} else {
+					return calculateColorFixedStat(palette2(pixelSize),pixelSize);
+				}
+            }
 
             return col;
 

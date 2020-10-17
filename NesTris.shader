@@ -3,46 +3,46 @@ uniform texture2d block_image;
 uniform bool setup_mode = true;
 uniform float field_left_x = 96;
 uniform float field_right_x = 176;
-uniform float field_top_y = 43;
-uniform float field_bottom_y = 196;
+uniform float field_top_y = 39;
+uniform float field_bottom_y = 199;
 
 uniform bool stat_palette_white = true;
 uniform bool stat_palette;
 uniform bool fixed_palette;
 uniform texture2d fixed_palette_image;
 
-uniform float paletteA_x1 = 30;
-uniform float paletteA_y1 = 104;
-uniform float paletteA_x2 = 30;
-uniform float paletteA_y2 = 156;
+uniform float paletteA_x1 = 29;
+uniform float paletteA_y1 = 103;
+uniform float paletteA_x2 = 29;
+uniform float paletteA_y2 = 158;
 
-uniform float paletteB_x1 = 30;
+uniform float paletteB_x1 = 29;
 uniform float paletteB_y1 = 120;
-uniform float paletteB_x2 = 30;
-uniform float paletteB_y2 = 170;
+uniform float paletteB_x2 = 29;
+uniform float paletteB_y2 = 173;
 
 uniform bool sharpen_stats;
 uniform texture2d stats_image;
-uniform float stat_t_top_y = 87;
+uniform float stat_t_top_y = 84;
 uniform float stat_i_left_x = 24;
 uniform float stat_i_right_x = 47;
-uniform float stat_i_bottom_y = 185;
+uniform float stat_i_bottom_y = 189;
 
 uniform bool sharpen_preview = true;
 uniform float preview_left_x = 192;
 uniform float preview_right_x = 223;
 uniform float preview_top_y = 112;
-uniform float preview_bottom_y = 128;
+uniform float preview_bottom_y = 127;
 
 uniform bool skip_detect_game;
 uniform bool skip_detect_game_over;
 
 uniform float game_black_x1 = 98;
-uniform float game_black_y1 = 26;
-uniform float game_black_x2 = 240;
-uniform float game_black_y2 = 24;
-uniform float game_grey_x1 = 36;
-uniform float game_grey_y1 = 214;
+uniform float game_black_y1 = 20;
+uniform float game_black_x2 = 236;
+uniform float game_black_y2 = 20;
+uniform float game_grey_x1 = 35;
+uniform float game_grey_y1 = 220;
 
 uniform texture2d menu_overlay;
 uniform bool show_menu_overlay;
@@ -67,7 +67,7 @@ float distPoints(float2 a, float2 b)
 
 float3 closest_stat(float2 uv)
 {
-    const float2 test[28] = float2[28](
+    const float2 test[28] = {
     float2(0.195, 0.023), //T
     float2(0.456, 0.023),
     float2(0.727, 0.023),
@@ -101,7 +101,7 @@ float3 closest_stat(float2 uv)
     float2(0.195, 0.782),//L
     float2(0.456, 0.782),
     float2(0.727, 0.782),
-    float2(0.195, 0.840));
+    float2(0.195, 0.840)};
 
 
     float min_dist = distPoints(uv,test[0]);
