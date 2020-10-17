@@ -23,6 +23,13 @@ Do not proceed to step 2 until you have confirmed that obs-shader-filter is inst
 * Calibrate (look below for instructions)
 * Untick "**setup mode**"
 
+# Applying directly to capture card
+
+If you want to apply the sharpener directly to your capture card; or want sharpened stats blocks, refer to this diagram:
+![image](https://github.com/alex-ong/NESTrisSharpener/raw/master/doc/which-shader.png)
+
+
+
 # Interlacing
 Note that this shader assumes a perfectly deinterlaced image.
 Below is a problem that is not solvable if your image is interlaced - we can't figure out the block because the image isn't clean:
